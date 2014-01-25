@@ -32,6 +32,37 @@
 	</dependencies>
 
 	<build>
+		<pluginManagement>
+			<plugins>
+				<!-- Ignore/Execute plugin execution -->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<!-- copy-dependency plugin -->
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.apache.maven.plugins</groupId>
+										<artifactId>maven-dependency-plugin</artifactId>
+										<versionRange>[1.0.0,)</versionRange>
+										<goals>
+											<goal>copy-dependencies</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore />
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -42,7 +73,78 @@
 					<target>${java.version}</target>
 				</configuration>
 			</plugin>
-		</plugins>
-	</build>
 
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>2.4</version>
+				<executions>
+					<execution>
+						<id>copy-dependencies</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<includeScope>compile</includeScope>
+							<outputDirectory>
+								${project.build.directory}
+							</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- Build an executable JAR -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.3.1</version>
+
+				<executions>
+					<execution>
+						<id>fileArchiver</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<phase>package</phase>
+						<configuration>
+							<classifier>fileArchiver</classifier>
+							<archive>
+								<manifest>
+									<addClasspath>true</addClasspath>
+									<mainClass>dk.truelink.ext.folder.archiver.FileArchiverMain</mainClass>
+								</manifest>
+							</archive>
+							<excludes>
+								<exclude>**/configarchiver/*</exclude>
+								<exclude>**/configarchiver</exclude>
+							</excludes>
+						</configuration>
+					</execution>
+					<execution>
+						<id>configFileArchiver</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<phase>package</phase>
+						<configuration>
+							<classifier>configFileArchiver</classifier>
+							<archive>
+								<manifest>
+									<mainClass>dk.truelink.ext.folder.configarchiver.BeginMainConfigWindow</mainClass>
+								</manifest>
+							</archive>
+							<excludes>
+								<exclude>**/archiver/*</exclude>
+								<exclude>**/archiver</exclude>
+							</excludes>
+						</configuration>
+					</execution>
+				</executions>
+
+
+			</plugin>
+		</plugins>
+
+	</build>
 </project>
