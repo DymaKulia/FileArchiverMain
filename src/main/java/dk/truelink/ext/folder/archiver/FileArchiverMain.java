@@ -17,6 +17,9 @@ import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
 public class FileArchiverMain {
 
 	private static final String LOCK_FILENAME = "fileArchiver.lock";
@@ -31,6 +34,17 @@ public class FileArchiverMain {
 
 	public static void main(String[] args) {
 
+		String host, username, password;
+		int port;
+		host ="smtp.gmail.com";
+		port = 587;
+		username="d.kylay@gmail.com";
+		password="121988dymakulia";
+		
+		EMailNotifier mailNotifier = new EMailNotifier(host,port,username,password);
+		mailNotifier.sendMail("d.kylay@mail.ru", "Testing123",
+				"Testing only \n\n Hello Spring Email Sender");
+		
 		if (args.length < 3) {
 			System.out.println("Utility to archive contents of some folder, grouped by last change date. If folder contains subfolders, files in these subfolders will also be archived keeping relative path.");
 			System.out.println("Usage: java -jar FileArchiverMain.jar <path to folder with files> <path to destination folder> <path to temporary folder> [-cleanSource -gzip -noSubFolderScan]");
