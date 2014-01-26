@@ -6,6 +6,7 @@ public class BeginMainConfigWindow {
 		
 		MainConfigWindow mainConfigWindow = new MainConfigWindow();
         mainConfigWindow.setSize(250, 150);
+        mainConfigWindow.setLocationRelativeTo(null);              
         mainConfigWindow.setVisible(true);
         mainConfigWindow.setResizable(false);        
 	}

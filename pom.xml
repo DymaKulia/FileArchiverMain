@@ -3,9 +3,8 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>dk.truelink.ext.folder.archiver</groupId>
-	<artifactId>FileArchiverMain</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<packaging>jar</packaging>
+	<artifactId>Archiver</artifactId>
+	<version>0.0.1</version>	
 
 	<name>FileArchiverMain</name>
 	<url>http://maven.apache.org</url>
