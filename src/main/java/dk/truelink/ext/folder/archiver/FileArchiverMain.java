@@ -39,21 +39,45 @@ public class FileArchiverMain {
 
 	public static void main(String[] args) {
 
-		
 		Helper helper = new Helper();
 		String pathToJarFile = Helper.findPathToJar(helper);
 		File archiverConfigXml = new File(pathToJarFile + "configArchiver.xml");
-		
-		ArrayList<Entry> configuration = Helper.readFromConfigArchiverXml(archiverConfigXml);
-		
+
+		ArrayList<Entry> configuration = Helper
+				.readFromConfigArchiverXml(archiverConfigXml);
+
 		for (int i = 0; i < configuration.size(); i++) {
-			
+
 			/*
-			 ...................Create inArgs from configuration items
-			 and change ageModify
-			*/
+			 * ...................Create inArgs from configuration items and
+			 * change ageModify
+			 */
+			Entry entry = configuration.get(i);
+			int countInArgs = 3;
+
+			if (entry.getGzip().equals("true")) {
+				countInArgs++;
+			}
+			if (entry.getNoSubFolderScan().equals("true")) {
+				countInArgs++;
+			}
 			
-			String[] inArgs = new String[5];
+			int index = 0;
+			String[] inArgs = new String[countInArgs];
+			inArgs[index] = entry.getSourseFolder();
+			index++;
+			inArgs[index] = entry.getDestFolder();
+			index++;
+			inArgs[index] = entry.getTempFolder();
+			if (entry.getGzip().equals("true")) {
+				index++;
+				inArgs[index] = GZIP_PARAM;
+			}
+			if (entry.getNoSubFolderScan().equals("true")) {
+				index++;
+				inArgs[index] = NO_SUBFOLDER_SCAN_PARAM;
+			}
+			ageModify = Integer.parseInt(entry.getAgeModify()) * -1;
 			try {
 				mainArchiverMethod(inArgs);
 			} catch (Exception ex) {
@@ -61,14 +85,14 @@ public class FileArchiverMain {
 						+ inArgs + "is aborted");
 				System.out.println(ex);
 			}
-			
+
 		}
 	}
 
 	public static void mainArchiverMethod(String[] args) {
 
 		// Mail notification module
-		String host, username, password, sendTo;
+		/*String host, username, password, sendTo;
 		int port;
 		Helper helper = new Helper();
 		String pathToJarFile = Helper.findPathToJar(helper);
@@ -87,9 +111,16 @@ public class FileArchiverMain {
 					username, password);
 			mailNotifier.sendMail(sendTo, "Testing123",
 					"Testing only \n\n Hello Spring Email Sender");
-		}
+		}*/
 		//
 
+		/* read memory space
+		File file = new File("C:\\");
+		System.out.println(file.getFreeSpace());
+		File file2 = new File("D:\\1.doc");
+		System.out.println(file2.length());
+		*/
+		
 		if (args.length < 3) {
 			System.out
 					.println("Utility to archive contents of some folder, grouped by last change date. If folder contains subfolders, files in these subfolders will also be archived keeping relative path.");
