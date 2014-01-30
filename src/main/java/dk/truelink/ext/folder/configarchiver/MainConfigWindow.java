@@ -40,7 +40,7 @@ public class MainConfigWindow extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				ArchiverConfigWindow archiverConfigWindow = new ArchiverConfigWindow();
-				archiverConfigWindow.setSize(700, 300);
+				archiverConfigWindow.setSize(800, 300);
 				archiverConfigWindow.setLocationRelativeTo(null);   
 				archiverConfigWindow.setVisible(true);
 				archiverConfigWindow.setResizable(false);				

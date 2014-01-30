@@ -8,7 +8,7 @@ public class ConfigArchiverTableModel extends AbstractTableModel {
 
 	private static final long serialVersionUID = 1L;
 	private ArrayList<Entry> configuration;
-	private String[] columnName= new String [] {"Sourse folder ","Dest folder","Temp folder", "Age modify"};
+	private String[] columnName= new String [] {"Sourse folder ","Dest folder","Temp folder", "Age modify", "-gzip","-noSubFolderScan"};
 	
 	public ConfigArchiverTableModel(ArrayList<Entry> configuration) {
 		this.configuration = configuration;
@@ -16,7 +16,7 @@ public class ConfigArchiverTableModel extends AbstractTableModel {
 
 	@Override
 	public int getColumnCount() {		
-		return 4;
+		return 6;
 	}
 
 	@Override
@@ -36,7 +36,11 @@ public class ConfigArchiverTableModel extends AbstractTableModel {
          case 2:
         	 return configuration.get(row).getTempFolder();        	 
          case 3:
-        	 return configuration.get(row).getAgeModify();        	 
+        	 return configuration.get(row).getAgeModify(); 
+         case 4:
+        	 return configuration.get(row).getGzip();
+         case 5:
+        	 return configuration.get(row).getNoSubFolderScan();
          default:
         	 return null;
         }		

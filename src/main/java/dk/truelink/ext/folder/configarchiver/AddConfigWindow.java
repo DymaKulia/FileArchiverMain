@@ -6,9 +6,11 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.ArrayList;
 
 import javax.swing.AbstractAction;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
@@ -32,6 +34,12 @@ public class AddConfigWindow extends JFrame {
 	private JLabel ageModifyLabel;
 	private JTextField age;
 	private JLabel ageModifyError;
+	
+	private JLabel gzipLabel;
+	private JComboBox gzip;
+	
+	private JLabel noSubFolderScanLabel;
+	private JComboBox noSubFolderScan;
 
 	private Button ok;
 	private Button cansel;
@@ -77,7 +85,18 @@ public class AddConfigWindow extends JFrame {
 		age.setPreferredSize(new Dimension(100, 30));
 		ageModifyError = new JLabel();
 		ageModifyError.setPreferredSize(new Dimension(50, 30));
-
+		
+		gzipLabel = new JLabel("-gzip");
+		gzipLabel.setPreferredSize(new Dimension(80, 30));
+		gzip = new JComboBox(new String[]{"false", "true"});
+		gzip.setPreferredSize(new Dimension(100, 30));
+		
+		noSubFolderScanLabel = new JLabel("-noSubFolderScan");
+		noSubFolderScanLabel.setPreferredSize(new Dimension(80, 30));
+		noSubFolderScan = new JComboBox(new String[]{"false", "true"});
+		noSubFolderScan.setPreferredSize(new Dimension(100, 30));
+		
+		
 		ok = new Button("Ok");
 		ok.setPreferredSize(new Dimension(50, 30));
 		ok.addActionListener(new OkAction());
@@ -114,6 +133,20 @@ public class AddConfigWindow extends JFrame {
 		c.add(ageModifyLabel);
 		c.add(age);
 		c.add(ageModifyError);
+		
+		JLabel emptyLabel1 = new JLabel();
+		emptyLabel1.setPreferredSize(new Dimension(50, 30));
+		
+		c.add(gzipLabel);
+		c.add(gzip);		
+		c.add(emptyLabel1);
+		
+		JLabel emptyLabel2 = new JLabel();
+		emptyLabel2.setPreferredSize(new Dimension(50, 30));
+		
+		c.add(noSubFolderScanLabel);
+		c.add(noSubFolderScan);
+		c.add(emptyLabel2);
 
 		c.add(ok);
 		c.add(cansel);
@@ -126,23 +159,25 @@ public class AddConfigWindow extends JFrame {
 		@Override
 		public void actionPerformed(ActionEvent addAction) {
 
-			String[] informationFromElements = new String[4];
-			if (readInformationFromElements(informationFromElements)) {
-			
+			String[] informationFromElements = new String[6];
+			if (readAndValidInformationFromElements(informationFromElements)) {
+
 				Entry entry = new Entry();
 				entry.setSourseFolder(informationFromElements[0]);
 				entry.setDestFolder(informationFromElements[1]);
 				entry.setTempFolder(informationFromElements[2]);
 				entry.setAgeModify(informationFromElements[3]);
-				
+				entry.setGzip(informationFromElements[4]);
+				entry.setNoSubFolderScan(informationFromElements[5]);				
+
 				configuration.add(entry);
 				configArchiverTableModel.fireTableStructureChanged();
-			
+
 				AddConfigWindow.this.dispose();
 			}
 		}
 
-		private boolean readInformationFromElements(
+		private boolean readAndValidInformationFromElements(
 				String[] informationFromElements) {
 			
 			int countErrors = 0;
@@ -179,7 +214,73 @@ public class AddConfigWindow extends JFrame {
 			}
 
 			if (countErrors == 0) {
-				return true;
+
+				File sourceFolder = new File(sourse.getText());
+				File destFolder = new File(dest.getText());
+				File tempFolder = new File(temp.getText());
+
+				if (!sourceFolder.isDirectory()) {
+					countErrors++;
+					sourseFolderError.setText("Not directory");
+				}	
+				
+				if (!sourceFolder.exists()) {
+					countErrors++;
+					sourseFolderError.setText("No exist");
+				}	
+				
+				if (!destFolder.isDirectory()) {
+					countErrors++;
+					destFolderError.setText("Not directory");
+				}
+				
+				if (!destFolder.exists()) {
+					countErrors++;
+					destFolderError.setText("No exist");
+				}	
+				
+				if (!tempFolder.isDirectory()) {
+					countErrors++;
+					tempFolderError.setText("Not directory");
+				}
+				
+				if (!tempFolder.exists()) {
+					countErrors++;
+					tempFolderError.setText("No exist");
+				}
+
+				if (sourceFolder.getAbsolutePath().equals(
+						destFolder.getAbsolutePath())) {
+
+					countErrors++;
+					sourseFolderError.setText("Same");
+					destFolderError.setText("Same");
+				}
+				if (tempFolder.getAbsolutePath().equals(
+						destFolder.getAbsolutePath())) {
+
+					countErrors++;
+					tempFolderError.setText("Same");
+					destFolderError.setText("Same");
+				}
+				if (sourceFolder.getAbsolutePath().equals(
+						tempFolder.getAbsolutePath())) {
+
+					countErrors++;
+					sourseFolderError.setText("Same");
+					tempFolderError.setText("Same");
+				}
+
+				if (countErrors == 0) {
+					
+					informationFromElements[4] = gzip.getSelectedItem().toString();
+					informationFromElements[5] = noSubFolderScan.getSelectedItem().toString();
+					
+					return true;
+				} else {
+					return false;
+				}
+
 			} else {
 				return false;
 			}

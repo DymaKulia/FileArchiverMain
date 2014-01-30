@@ -6,12 +6,30 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 
 import javax.swing.AbstractAction;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import dk.truelink.ext.folder.common.DocumentBuilderCreator;
+import dk.truelink.ext.folder.common.Helper;
 
 public class ArchiverConfigWindow extends JFrame {
 
@@ -23,10 +41,12 @@ public class ArchiverConfigWindow extends JFrame {
 	private Button save;
 	private Button cansel;
 
-	private JTable configArchiver;
+	private JTable configArchiverTable;
 	private ConfigArchiverTableModel configArchiverTableModel;
 
-	ArrayList<Entry> configuration;
+	private ArrayList<Entry> configuration;
+
+	private String pathToJarFile;
 
 	public ArchiverConfigWindow() {
 		createAndConfigureWindowElements();
@@ -71,28 +91,28 @@ public class ArchiverConfigWindow extends JFrame {
 
 	private void fillArchiverConfigWindow() {
 
-		configuration = new ArrayList<Entry>();
-		// Read from Xml and fill configuration
-		// ...
-		//
-		
-		Entry entry = new Entry();
-		entry.setAgeModify("2");
-		entry.setDestFolder("C:/1");
-		entry.setSourseFolder("D:/");
-		entry.setTempFolder("F:/");
+		pathToJarFile = Helper.findPathToJar(this);
+		File configArchiverXml = new File(pathToJarFile + "configArchiver.xml");
 
-		configuration.add(entry);
+		System.out.println(configArchiverXml + " path to configArchiver.xml");
+
+		if (configArchiverXml.exists()) {
+
+			configuration = Helper.readFromConfigArchiverXml(configArchiverXml);
+		} else {
+
+			configuration = new ArrayList<Entry>();
+		}
 
 		configArchiverTableModel = new ConfigArchiverTableModel(configuration);
-		configArchiver = new JTable(configArchiverTableModel);
+		configArchiverTable = new JTable(configArchiverTableModel);
 	}
 
 	private void addToContainer() {
 		Container c = getContentPane();
 		c.setLayout(new FlowLayout());
-		JScrollPane scrollPane = new JScrollPane(configArchiver);
-		scrollPane.setPreferredSize(new Dimension(700, 200));
+		JScrollPane scrollPane = new JScrollPane(configArchiverTable);
+		scrollPane.setPreferredSize(new Dimension(800, 200));
 		c.add(scrollPane);
 		c.add(add);
 		c.add(delete);
@@ -107,6 +127,11 @@ public class ArchiverConfigWindow extends JFrame {
 		@Override
 		public void actionPerformed(ActionEvent addAction) {
 
+			int[] selectedRows = configArchiverTable.getSelectedRows();
+			for (int i = 0; i < selectedRows.length; i++) {
+				configuration.remove(selectedRows[selectedRows.length - 1 - i]);
+			}
+			configArchiverTableModel.fireTableStructureChanged();
 		}
 	}
 
@@ -117,6 +142,77 @@ public class ArchiverConfigWindow extends JFrame {
 		@Override
 		public void actionPerformed(ActionEvent addAction) {
 
+			File configArchiverXml = new File(pathToJarFile
+					+ "configArchiver.xml");
+			if (configArchiverXml.exists()) {
+				configArchiverXml.delete();
+			}
+
+			DocumentBuilder builder = DocumentBuilderCreator.getInstance();
+			Document doc = builder.newDocument();
+			Element archiverSettings = doc.createElement("archiver_settings");
+
+			for (int i = 0; i < configuration.size(); i++) {
+				System.out.println(i);
+				Element setting = doc.createElement("setting");
+				Element sourseFolder = doc.createElement("sourse_folder");
+				sourseFolder.appendChild(doc.createTextNode(configuration
+						.get(i).getSourseFolder()));
+
+				Element destFolder = doc.createElement("dest_folder");
+				destFolder.appendChild(doc.createTextNode(configuration.get(i)
+						.getDestFolder()));
+
+				Element tempFolder = doc.createElement("temp_folder");
+				tempFolder.appendChild(doc.createTextNode(configuration.get(i)
+						.getTempFolder()));
+
+				Element ageModify = doc.createElement("age_modify");
+				ageModify.appendChild(doc.createTextNode(configuration.get(i)
+						.getAgeModify()));
+				
+				Element gzip = doc.createElement("gzip");
+				gzip.appendChild(doc.createTextNode(configuration.get(i)
+						.getGzip()));
+				
+				Element noSubFolderScan = doc.createElement("noSubFolderScan");
+				noSubFolderScan.appendChild(doc.createTextNode(configuration.get(i)
+						.getNoSubFolderScan()));
+
+				setting.appendChild(sourseFolder);
+				setting.appendChild(destFolder);
+				setting.appendChild(tempFolder);
+				setting.appendChild(ageModify);
+				setting.appendChild(gzip);
+				setting.appendChild(noSubFolderScan);
+
+				archiverSettings.appendChild(setting);
+			}
+			
+			doc.appendChild(archiverSettings);
+
+			// Write to file
+			OutputStream file = null;
+			try {
+				file = new FileOutputStream(configArchiverXml);
+			} catch (FileNotFoundException e) {
+				new RuntimeException(e);
+			}
+			Transformer transformer = null;
+			try {
+				transformer = TransformerFactory.newInstance().newTransformer();
+			} catch (TransformerConfigurationException e) {
+				new RuntimeException(e);
+			}
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			try {
+				transformer.transform(new DOMSource(doc),
+						new StreamResult(file));
+			} catch (TransformerException e) {
+				new RuntimeException(e);
+			}
+
+			ArchiverConfigWindow.this.dispose();
 		}
 	}
 

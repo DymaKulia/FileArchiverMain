@@ -6,6 +6,8 @@ public class Entry {
 	private String tempFolder;
 	private String destFolder;
 	private String ageModify;
+	private String gzip;
+	private String noSubFolderScan;
 	
 	public String getSourseFolder() {
 		return sourseFolder;
@@ -30,5 +32,17 @@ public class Entry {
 	}
 	public void setAgeModify(String ageModify) {
 		this.ageModify = ageModify;
+	}
+	public String getGzip() {
+		return gzip;
+	}
+	public void setGzip(String gzip) {
+		this.gzip = gzip;
+	}
+	public String getNoSubFolderScan() {
+		return noSubFolderScan;
+	}
+	public void setNoSubFolderScan(String noSubFolderScan) {
+		this.noSubFolderScan = noSubFolderScan;
 	}
 }

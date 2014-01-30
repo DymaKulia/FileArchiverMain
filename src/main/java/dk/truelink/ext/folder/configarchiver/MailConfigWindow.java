@@ -17,8 +17,6 @@ import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
@@ -30,6 +28,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import dk.truelink.ext.folder.common.DocumentBuilderCreator;
 import dk.truelink.ext.folder.common.Helper;
 
 public class MailConfigWindow extends JFrame {
@@ -124,11 +123,13 @@ public class MailConfigWindow extends JFrame {
 
 		pathToJarFile = Helper.findPathToJar(this);
 		File mailXml = new File(pathToJarFile + "mailXml.xml");
-		// System.out.println(mailXml + " mailXml");
+
+		System.out.println(mailXml + " path to mailXml.xml");
+
 		if (mailXml.exists()) {
-			
+
 			String[] fromMailXml = Helper.readFromMailXml(mailXml);
-			
+
 			host.setText(fromMailXml[0]);
 			port.setText(fromMailXml[1]);
 			username.setText(fromMailXml[2]);
@@ -178,58 +179,57 @@ public class MailConfigWindow extends JFrame {
 			String[] informationFromElements = new String[5];
 			if (readInformationFromElements(informationFromElements)) {
 
-				DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		        DocumentBuilder builder=null;
-		        try {
-		            builder = factory.newDocumentBuilder();
-		        } catch (ParserConfigurationException e) {
-		        	new RuntimeException(e);
-		        }
-		        Document doc = builder.newDocument();		        
-		        Element mailSettings = doc.createElement("mail_settings");		      
-		        
-		        Element host = doc.createElement("host");
-		        host.appendChild(doc.createTextNode(informationFromElements[0]));
-		        mailSettings.appendChild(host);
-		        
-		        Element port = doc.createElement("port");
-		        port.appendChild(doc.createTextNode(informationFromElements[1]));
-		        mailSettings.appendChild(port);
-		        
-		        Element username = doc.createElement("username");
-		        username.appendChild(doc.createTextNode(informationFromElements[2]));
-		        mailSettings.appendChild(username);
-		        
-		        Element password = doc.createElement("password");
-		        password.appendChild(doc.createTextNode(informationFromElements[3]));
-		        mailSettings.appendChild(password);
-		        
-		        Element sendTo = doc.createElement("sendTo");
-		        sendTo.appendChild(doc.createTextNode(informationFromElements[4]));
-		        mailSettings.appendChild(sendTo);
-		       
-		        doc.appendChild(mailSettings); 
-		        
-		        //Запись в файл		        
-		        OutputStream file=null;        
-		        try {
-		            file = new FileOutputStream(mailXml);
-		        } catch (FileNotFoundException e) {
-		        	new RuntimeException(e);
-		        }
-		        Transformer transformer=null;
-		        try {
-		            transformer = TransformerFactory.newInstance().newTransformer();
-		        } catch (TransformerConfigurationException e) {
-		        	new RuntimeException(e);
-		        }
-		        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-		        try {
-		            transformer.transform(new DOMSource(doc), new StreamResult(file));
-		        } catch (TransformerException e) {
-		        	new RuntimeException(e);
-		        }
-				
+				DocumentBuilder builder = DocumentBuilderCreator.getInstance();
+				Document doc = builder.newDocument();
+				Element mailSettings = doc.createElement("mail_settings");
+
+				Element host = doc.createElement("host");
+				host.appendChild(doc.createTextNode(informationFromElements[0]));
+				mailSettings.appendChild(host);
+
+				Element port = doc.createElement("port");
+				port.appendChild(doc.createTextNode(informationFromElements[1]));
+				mailSettings.appendChild(port);
+
+				Element username = doc.createElement("username");
+				username.appendChild(doc
+						.createTextNode(informationFromElements[2]));
+				mailSettings.appendChild(username);
+
+				Element password = doc.createElement("password");
+				password.appendChild(doc
+						.createTextNode(informationFromElements[3]));
+				mailSettings.appendChild(password);
+
+				Element sendTo = doc.createElement("sendTo");
+				sendTo.appendChild(doc
+						.createTextNode(informationFromElements[4]));
+				mailSettings.appendChild(sendTo);
+
+				doc.appendChild(mailSettings);
+
+				// Write to file
+				OutputStream file = null;
+				try {
+					file = new FileOutputStream(mailXml);
+				} catch (FileNotFoundException e) {
+					new RuntimeException(e);
+				}
+				Transformer transformer = null;
+				try {
+					transformer = TransformerFactory.newInstance()
+							.newTransformer();
+				} catch (TransformerConfigurationException e) {
+					new RuntimeException(e);
+				}
+				transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+				try {
+					transformer.transform(new DOMSource(doc), new StreamResult(
+							file));
+				} catch (TransformerException e) {
+					new RuntimeException(e);
+				}
+
 				MailConfigWindow.this.dispose();
 			}
 		}
