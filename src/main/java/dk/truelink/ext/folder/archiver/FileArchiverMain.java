@@ -50,6 +50,7 @@ public class FileArchiverMain {
 			
 			/*
 			 ...................Create inArgs from configuration items
+			 and change ageModify
 			*/
 			
 			String[] inArgs = new String[5];
