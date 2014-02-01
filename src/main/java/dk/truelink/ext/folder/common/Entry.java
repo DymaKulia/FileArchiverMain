@@ -1,4 +1,4 @@
-package dk.truelink.ext.folder.configarchiver;
+package dk.truelink.ext.folder.common;
 
 public class Entry {
 

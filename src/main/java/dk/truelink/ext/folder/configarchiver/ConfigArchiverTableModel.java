@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 import javax.swing.table.AbstractTableModel;
 
+import dk.truelink.ext.folder.common.Entry;
+
 public class ConfigArchiverTableModel extends AbstractTableModel {
 
 	private static final long serialVersionUID = 1L;

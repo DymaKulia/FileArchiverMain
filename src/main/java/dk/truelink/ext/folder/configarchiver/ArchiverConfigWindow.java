@@ -29,6 +29,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import dk.truelink.ext.folder.common.DocumentBuilderCreator;
+import dk.truelink.ext.folder.common.Entry;
 import dk.truelink.ext.folder.common.Helper;
 
 public class ArchiverConfigWindow extends JFrame {
@@ -63,7 +64,7 @@ public class ArchiverConfigWindow extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				AddConfigWindow archiverConfigWindow = new AddConfigWindow(
 						configuration, configArchiverTableModel);
-				archiverConfigWindow.setSize(300, 300);
+				archiverConfigWindow.setSize(300, 350);
 				archiverConfigWindow.setLocationRelativeTo(null);
 				archiverConfigWindow.setVisible(true);
 				archiverConfigWindow.setResizable(false);

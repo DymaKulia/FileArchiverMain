@@ -18,11 +18,8 @@ import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-
+import dk.truelink.ext.folder.common.Entry;
 import dk.truelink.ext.folder.common.Helper;
-import dk.truelink.ext.folder.configarchiver.Entry;
 
 public class FileArchiverMain {
 
@@ -35,7 +32,8 @@ public class FileArchiverMain {
 	private static final FileFilter fileFilter = new BeforeYesterdayFileFilter();
 	private static final FileFilter filesOnlyFilter = new FilesFilter();
 	private static final FileFilter folderFilter = new FolderFileFilter();
-	private static int ageModify = -1;
+	private static int ageModify;
+	private static long marginMemory = 100000000;
 
 	public static void main(String[] args) {
 
@@ -49,8 +47,7 @@ public class FileArchiverMain {
 		for (int i = 0; i < configuration.size(); i++) {
 
 			/*
-			 * ...................Create inArgs from configuration items and
-			 * change ageModify
+			 * Create inArgs from configuration items and set ageModify
 			 */
 			Entry entry = configuration.get(i);
 			int countInArgs = 3;
@@ -61,7 +58,7 @@ public class FileArchiverMain {
 			if (entry.getNoSubFolderScan().equals("true")) {
 				countInArgs++;
 			}
-			
+
 			int index = 0;
 			String[] inArgs = new String[countInArgs];
 			inArgs[index] = entry.getSourseFolder();
@@ -77,12 +74,17 @@ public class FileArchiverMain {
 				index++;
 				inArgs[index] = NO_SUBFOLDER_SCAN_PARAM;
 			}
+
 			ageModify = Integer.parseInt(entry.getAgeModify()) * -1;
 			try {
+				System.out.println(inArgs.length+ "inArgs.length");
 				mainArchiverMethod(inArgs);
 			} catch (Exception ex) {
-				System.out.println("Archive prosess with inner parameters "
-						+ inArgs + "is aborted");
+				System.out.println("Archive prosess with inner parameters ");
+				for (int k = 0; k < inArgs.length; k++) {
+					System.out.print(inArgs[k] + " ");
+				}
+				System.out.println("is aborted");
 				System.out.println(ex);
 			}
 
@@ -91,42 +93,10 @@ public class FileArchiverMain {
 
 	public static void mainArchiverMethod(String[] args) {
 
-		// Mail notification module
-		/*String host, username, password, sendTo;
-		int port;
-		Helper helper = new Helper();
-		String pathToJarFile = Helper.findPathToJar(helper);
-		File mailXml = new File(pathToJarFile + "mailXml.xml");
-
-		if (mailXml.exists()) {
-
-			String[] fromMailXml = Helper.readFromMailXml(mailXml);
-			host = fromMailXml[0];
-			port = Integer.parseInt(fromMailXml[1]);
-			username = fromMailXml[2];
-			password = fromMailXml[3];
-			sendTo = fromMailXml[4];
-
-			EMailNotifier mailNotifier = new EMailNotifier(host, port,
-					username, password);
-			mailNotifier.sendMail(sendTo, "Testing123",
-					"Testing only \n\n Hello Spring Email Sender");
-		}*/
-		//
-
-		/* read memory space
-		File file = new File("C:\\");
-		System.out.println(file.getFreeSpace());
-		File file2 = new File("D:\\1.doc");
-		System.out.println(file2.length());
-		*/
-		
 		if (args.length < 3) {
 			System.out
 					.println("Utility to archive contents of some folder, grouped by last change date. If folder contains subfolders, files in these subfolders will also be archived keeping relative path.");
-			// System.out.println("Usage: java -jar FileArchiverMain.jar <path to folder with files> <path to destination folder> <path to temporary folder> [-cleanSource -gzip -noSubFolderScan]");
-			// System.exit(-1);// !!!!!!!!
-			new RuntimeException("args.length < 3");
+			throw new RuntimeException("args.length < 3");
 		}
 		String source = args[0];
 		String dest = args[1];
@@ -156,9 +126,8 @@ public class FileArchiverMain {
 					if (lockFileLock == null) {
 						System.out
 								.println("Program has been already started. Found lock file in destination folder '"
-										+ lockFile.getAbsolutePath() + "'");
-						// System.exit(-1);// !!!!!!!!!!!
-						new RuntimeException("lockFileLock == null");
+										+ lockFile.getAbsolutePath() + "'");						
+						throw new RuntimeException("lockFileLock == null");
 					}
 
 					System.out.println("Program started with args:");
@@ -232,45 +201,39 @@ public class FileArchiverMain {
 		if (!sourceFolder.exists() || !sourceFolder.isDirectory()) {
 			System.out.println("Source folder "
 					+ sourceFolder.getAbsolutePath()
-					+ " does not exist or is not a directory");
-			// System.exit(-1);
-			new RuntimeException();
+					+ " does not exist or is not a directory");			
+			throw new RuntimeException();
 		}
 		if (!destFolder.exists() || !destFolder.isDirectory()) {
 			System.out.println("Destination folder "
 					+ destFolder.getAbsolutePath()
-					+ " does not exist or is not a directory");
-			// System.exit(-1);
-			new RuntimeException();
+					+ " does not exist or is not a directory");			
+			throw new RuntimeException();
 		}
 		if (!tempFolder.exists() || !tempFolder.isDirectory()) {
 			System.out.println("Temporary folder "
 					+ tempFolder.getAbsolutePath()
-					+ " does not exist or is not a directory");
-			// System.exit(-1);
-			new RuntimeException();
+					+ " does not exist or is not a directory");			
+			throw new RuntimeException();
 		}
 
 		if (sourceFolder.getAbsolutePath().equals(destFolder.getAbsolutePath())) {
 			System.out.println("Source " + sourceFolder.getAbsolutePath()
 					+ " and destination " + destFolder.getAbsolutePath()
-					+ "  folders must not be the same");
-			// System.exit(-1);
-			new RuntimeException();
+					+ "  folders must not be the same");			
+			throw new RuntimeException();
 		}
 		if (tempFolder.getAbsolutePath().equals(destFolder.getAbsolutePath())) {
 			System.out.println("Temporary " + tempFolder.getAbsolutePath()
 					+ " and destination " + destFolder.getAbsolutePath()
-					+ "  folders must not be the same");
-			// System.exit(-1);
-			new RuntimeException();
+					+ "  folders must not be the same");			
+			throw new RuntimeException();
 		}
 		if (sourceFolder.getAbsolutePath().equals(tempFolder.getAbsolutePath())) {
 			System.out.println("Source " + sourceFolder.getAbsolutePath()
 					+ " and temporary " + tempFolder.getAbsolutePath()
-					+ "  folders must not be the same");
-			// System.exit(-1);
-			new RuntimeException();
+					+ "  folders must not be the same");			
+			throw new RuntimeException();
 		}
 	}
 
@@ -300,6 +263,11 @@ public class FileArchiverMain {
 					"yyyy.MM.dd_HH.mm.ss.SSS")
 					.format(searchStartTime.getTime());
 			File tempSubFolder = new File(tempFolder, tempSubFolderName);
+
+			System.out.println("Check available disk space");
+
+			checkAvailableDiskSpace(sourceFolder, tempFolder,
+					noSubFolderScan, destFolder);
 
 			System.out.print("\t1.Moving files to temp sub folder '"
 					+ tempSubFolderName + "' ... ");
@@ -363,6 +331,61 @@ public class FileArchiverMain {
 			e.printStackTrace();
 		}
 		return count;
+	}
+
+	private static void checkAvailableDiskSpace(File sourceFolder,
+			File tempFolder, boolean noSubFolderScan,
+			File destFolder) {
+
+		final File[] fileArray = sourceFolder.listFiles();
+		long sizeFiles = calculateSizeFiles(fileArray, noSubFolderScan);
+
+		if (sizeFiles + marginMemory >= tempFolder.getFreeSpace()) {
+			String message = "Available disk space with temp folder is not enough to move."
+					+ " The size of files that need moving is "
+					+ sizeFiles
+					+ " Bytes. Available disk space"
+					+ " with temp folder is "
+					+ tempFolder.getFreeSpace() + " Bytes";
+			try {
+				sendEmail(message);
+			} catch (Exception e) {
+				System.out.println("Cannot send Email");
+				System.out.println(e);
+			}
+			throw new RuntimeException("do not have enough disc memory");
+		}
+
+		if (sizeFiles + marginMemory >= destFolder.getFreeSpace()) {
+			String message = "Available disk space with dest folder is not enough to achivation."
+					+ " The size of files that need archivation is "
+					+ sizeFiles
+					+ " Bytes. Available disk space"
+					+ " with dest folder is "
+					+ destFolder.getFreeSpace()
+					+ " Bytes";
+			sendEmail(message);
+			throw new RuntimeException("do not have enough disc memory");
+		}
+
+	}
+
+	private static long calculateSizeFiles(File[] fileArray,
+			boolean noSubFolderScan) {
+		
+		long sizeFiles = 0;
+		for (int i = 0; i < fileArray.length; i++) {
+			if(fileArray[i].isDirectory()){
+				if(!noSubFolderScan){
+					
+					sizeFiles += calculateSizeFiles(fileArray[i].listFiles(),
+							noSubFolderScan);
+				}				
+			} else {
+				sizeFiles += fileArray[i].length();
+			}
+		}
+		return sizeFiles;
 	}
 
 	protected static String buildDestSubFolderRelPath(final Date date) {
@@ -624,6 +647,31 @@ public class FileArchiverMain {
 		public boolean accept(File file) {
 			return file.isFile();
 		}
+	}
+
+	private static void sendEmail(String message) {
+
+		// Mail notification module
+		String host, username, password, sendTo;
+		int port;
+		Helper helper = new Helper();
+		String pathToJarFile = Helper.findPathToJar(helper);
+		File mailXml = new File(pathToJarFile + "mailXml.xml");
+
+		if (mailXml.exists()) {
+
+			String[] fromMailXml = Helper.readFromMailXml(mailXml);
+			host = fromMailXml[0];
+			port = Integer.parseInt(fromMailXml[1]);
+			username = fromMailXml[2];
+			password = fromMailXml[3];
+			sendTo = fromMailXml[4];
+
+			EMailNotifier mailNotifier = new EMailNotifier(host, port,
+					username, password);
+			mailNotifier.sendMail(sendTo, "Logs archiver", message);
+		}
+		//
 	}
 
 }

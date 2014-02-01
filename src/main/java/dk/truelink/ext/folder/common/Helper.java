@@ -14,8 +14,6 @@ import javax.xml.parsers.DocumentBuilder;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import dk.truelink.ext.folder.configarchiver.Entry;
-
 public class Helper {
 
 	public static String findPathToJar(Object classFromJar) {

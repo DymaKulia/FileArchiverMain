@@ -15,6 +15,8 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 
+import dk.truelink.ext.folder.common.Entry;
+
 public class AddConfigWindow extends JFrame {
 
 	private static final long serialVersionUID = 1L;
@@ -147,6 +149,11 @@ public class AddConfigWindow extends JFrame {
 		c.add(noSubFolderScanLabel);
 		c.add(noSubFolderScan);
 		c.add(emptyLabel2);
+		
+		JLabel emptyLabel = new JLabel();
+		emptyLabel.setPreferredSize(new Dimension(300, 35));
+		
+		c.add(emptyLabel);
 
 		c.add(ok);
 		c.add(cansel);
