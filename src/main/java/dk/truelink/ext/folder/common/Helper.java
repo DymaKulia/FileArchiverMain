@@ -33,7 +33,7 @@ public class Helper {
 		}
 		String nameFile = st.nextToken();
 		return pathDecode.substring(0, pathDecode.length()
-				- (nameFile.length()));//!!!!!!!!!!!!
+				- (nameFile.length()));//!!(+1 maybe need) may be reason of incorrect file path
 	}
 
 	public static String[] readFromMailXml(File mailXml) {
