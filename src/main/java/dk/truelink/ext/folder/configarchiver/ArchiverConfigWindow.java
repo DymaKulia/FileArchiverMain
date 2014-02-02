@@ -31,6 +31,7 @@ import org.w3c.dom.Element;
 import dk.truelink.ext.folder.common.DocumentBuilderCreator;
 import dk.truelink.ext.folder.common.Entry;
 import dk.truelink.ext.folder.common.Helper;
+import dk.truelink.ext.folder.common.PathToConfigFiles;
 
 public class ArchiverConfigWindow extends JFrame {
 
@@ -92,10 +93,10 @@ public class ArchiverConfigWindow extends JFrame {
 
 	private void fillArchiverConfigWindow() {
 
-		pathToJarFile = Helper.findPathToJar(this);
-		File configArchiverXml = new File(pathToJarFile + "configArchiver.xml");
+		//pathToJarFile = Helper.findPathToJar(this);
+		//File configArchiverXml = new File(pathToJarFile + "configArchiver.xml");
 
-		System.out.println(configArchiverXml + " path to configArchiver.xml");
+		File configArchiverXml = new File(PathToConfigFiles.PATH_TO_CONFIG_FILES + "configArchiver.xml");		
 
 		if (configArchiverXml.exists()) {
 
@@ -143,11 +144,18 @@ public class ArchiverConfigWindow extends JFrame {
 		@Override
 		public void actionPerformed(ActionEvent addAction) {
 
-			File configArchiverXml = new File(pathToJarFile
-					+ "configArchiver.xml");
+			//File configArchiverXml = new File(pathToJarFile
+			//		+ "configArchiver.xml");
+			
+			File configArchiverXml = new File(PathToConfigFiles.PATH_TO_CONFIG_FILES + "configArchiver.xml");			
 			if (configArchiverXml.exists()) {
 				configArchiverXml.delete();
 			}
+			
+			File pathToConfigFiles = new File(PathToConfigFiles.PATH_TO_CONFIG_FILES);			
+			if (!pathToConfigFiles.exists()) {
+				pathToConfigFiles.mkdirs();
+			}			
 
 			DocumentBuilder builder = DocumentBuilderCreator.getInstance();
 			Document doc = builder.newDocument();

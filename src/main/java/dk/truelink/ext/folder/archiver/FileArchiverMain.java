@@ -20,6 +20,7 @@ import java.util.zip.ZipOutputStream;
 
 import dk.truelink.ext.folder.common.Entry;
 import dk.truelink.ext.folder.common.Helper;
+import dk.truelink.ext.folder.common.PathToConfigFiles;
 
 public class FileArchiverMain {
 
@@ -37,10 +38,11 @@ public class FileArchiverMain {
 
 	public static void main(String[] args) {
 
-		Helper helper = new Helper();
-		String pathToJarFile = Helper.findPathToJar(helper);
-		File archiverConfigXml = new File(pathToJarFile + "configArchiver.xml");
+		//Helper helper = new Helper();
+		//String pathToJarFile = Helper.findPathToJar(helper);
+		//File archiverConfigXml = new File(pathToJarFile + "configArchiver.xml");
 
+		File archiverConfigXml = new File(PathToConfigFiles.PATH_TO_CONFIG_FILES + "configArchiver.xml");
 		ArrayList<Entry> configuration = Helper
 				.readFromConfigArchiverXml(archiverConfigXml);
 
@@ -654,10 +656,11 @@ public class FileArchiverMain {
 		// Mail notification module
 		String host, username, password, sendTo;
 		int port;
-		Helper helper = new Helper();
-		String pathToJarFile = Helper.findPathToJar(helper);
-		File mailXml = new File(pathToJarFile + "mailXml.xml");
-
+		//Helper helper = new Helper();
+		//String pathToJarFile = Helper.findPathToJar(helper);
+		//File mailXml = new File(pathToJarFile + "mailXml.xml");
+		
+		File mailXml = new File(PathToConfigFiles.PATH_TO_CONFIG_FILES + "mailXml.xml");
 		if (mailXml.exists()) {
 
 			String[] fromMailXml = Helper.readFromMailXml(mailXml);

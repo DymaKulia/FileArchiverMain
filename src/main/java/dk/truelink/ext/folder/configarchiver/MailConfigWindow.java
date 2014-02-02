@@ -14,6 +14,7 @@ import java.io.OutputStream;
 import javax.swing.AbstractAction;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.xml.parsers.DocumentBuilder;
@@ -30,6 +31,7 @@ import org.w3c.dom.Element;
 
 import dk.truelink.ext.folder.common.DocumentBuilderCreator;
 import dk.truelink.ext.folder.common.Helper;
+import dk.truelink.ext.folder.common.PathToConfigFiles;
 
 public class MailConfigWindow extends JFrame {
 	/**
@@ -121,10 +123,9 @@ public class MailConfigWindow extends JFrame {
 
 	private void fillMailWindow() {
 
-		pathToJarFile = Helper.findPathToJar(this);
-		File mailXml = new File(pathToJarFile + "mailXml.xml");
-
-		System.out.println(mailXml + " path to mailXml.xml");
+		//pathToJarFile = Helper.findPathToJar(this);
+		//File mailXml = new File(pathToJarFile + "mailXml.xml");
+		File mailXml = new File(PathToConfigFiles.PATH_TO_CONFIG_FILES + "mailXml.xml");		
 
 		if (mailXml.exists()) {
 
@@ -171,11 +172,17 @@ public class MailConfigWindow extends JFrame {
 
 		@Override
 		public void actionPerformed(ActionEvent addAction) {
-			File mailXml = new File(pathToJarFile + "mailXml.xml");
+			//File mailXml = new File(pathToJarFile + "mailXml.xml");
+			File mailXml = new File(PathToConfigFiles.PATH_TO_CONFIG_FILES + "mailXml.xml");			
 			if (mailXml.exists()) {
 				mailXml.delete();
 			}
-
+			
+			File pathToConfigFiles = new File(PathToConfigFiles.PATH_TO_CONFIG_FILES);			
+			if (!pathToConfigFiles.exists()) {
+				pathToConfigFiles.mkdirs();
+			}
+			
 			String[] informationFromElements = new String[5];
 			if (readInformationFromElements(informationFromElements)) {
 
