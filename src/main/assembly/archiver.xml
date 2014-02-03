@@ -21,6 +21,8 @@
 			<excludes>
 				<exclude>**/configarchiver/*</exclude>
 				<exclude>**/configarchiver</exclude>
+				<exclude>**/images/*</exclude>
+				<exclude>**/images</exclude>
 			</excludes>
 		</fileSet>
 	</fileSets>

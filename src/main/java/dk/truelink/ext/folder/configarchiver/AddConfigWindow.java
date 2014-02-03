@@ -1,6 +1,5 @@
 package dk.truelink.ext.folder.configarchiver;
 
-import java.awt.Button;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -10,6 +9,7 @@ import java.io.File;
 import java.util.ArrayList;
 
 import javax.swing.AbstractAction;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -21,15 +21,15 @@ public class AddConfigWindow extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 
-	private JLabel sourseFolderLabel;
+	private JButton sourseFolderLabelButton;
 	private JTextField sourse;
 	private JLabel sourseFolderError;
 
-	private JLabel destFolderLabel;
+	private JButton destFolderLabelButton;
 	private JTextField dest;
 	private JLabel destFolderError;
 
-	private JLabel tempFolderLabel;
+	private JButton tempFolderLabelButton;
 	private JTextField temp;
 	private JLabel tempFolderError;
 
@@ -43,8 +43,8 @@ public class AddConfigWindow extends JFrame {
 	private JLabel noSubFolderScanLabel;
 	private JComboBox noSubFolderScan;
 
-	private Button ok;
-	private Button cansel;
+	private JButton ok;
+	private JButton cansel;
 
 	private ArrayList<Entry> configuration;
 	private ConfigArchiverTableModel configArchiverTableModel;
@@ -58,24 +58,40 @@ public class AddConfigWindow extends JFrame {
 		createAndConfigureWindowElements();
 		addToContainer();
 	}
+	
+	public JTextField getSourse(){		
+		return sourse;
+	}
+	public JTextField getDest(){		
+		return dest;
+	}
+	public JTextField getTemp(){		
+		return temp;
+	}
 
 	private void createAndConfigureWindowElements() {
-		sourseFolderLabel = new JLabel("Sourse");
-		sourseFolderLabel.setPreferredSize(new Dimension(80, 30));
+		
+		ActionListener chooseFolder = new  ChooseFolderListener (); 		
+		
+		sourseFolderLabelButton = new JButton("sourse ...");
+		sourseFolderLabelButton.setPreferredSize(new Dimension(80, 30));
+		sourseFolderLabelButton.addActionListener(chooseFolder);
 		sourse = new JTextField();
 		sourse.setPreferredSize(new Dimension(100, 30));
 		sourseFolderError = new JLabel();
 		sourseFolderError.setPreferredSize(new Dimension(50, 30));
 
-		destFolderLabel = new JLabel("dest");
-		destFolderLabel.setPreferredSize(new Dimension(80, 30));
+		destFolderLabelButton = new JButton("dest ...");
+		destFolderLabelButton.setPreferredSize(new Dimension(80, 30));
+		destFolderLabelButton.addActionListener(chooseFolder);
 		dest = new JTextField();
 		dest.setPreferredSize(new Dimension(100, 30));
 		destFolderError = new JLabel();
 		destFolderError.setPreferredSize(new Dimension(50, 30));
 
-		tempFolderLabel = new JLabel("temp");
-		tempFolderLabel.setPreferredSize(new Dimension(80, 30));
+		tempFolderLabelButton = new JButton("temp ...");
+		tempFolderLabelButton.setPreferredSize(new Dimension(80, 30));
+		tempFolderLabelButton.addActionListener(chooseFolder);
 		temp = new JTextField();
 		temp.setPreferredSize(new Dimension(100, 30));
 		tempFolderError = new JLabel();
@@ -99,11 +115,11 @@ public class AddConfigWindow extends JFrame {
 		noSubFolderScan.setPreferredSize(new Dimension(100, 30));
 		
 		
-		ok = new Button("Ok");
+		ok = new JButton("Ok");
 		ok.setPreferredSize(new Dimension(50, 30));
 		ok.addActionListener(new OkAction());
 
-		cansel = new Button("Cansel");
+		cansel = new JButton("Cansel");
 		cansel.addActionListener(new ActionListener() {
 
 			@Override
@@ -111,7 +127,7 @@ public class AddConfigWindow extends JFrame {
 				AddConfigWindow.this.dispose();
 			}
 		});
-		cansel.setPreferredSize(new Dimension(50, 30));
+		cansel.setPreferredSize(new Dimension(100, 30));
 
 	}
 
@@ -120,15 +136,15 @@ public class AddConfigWindow extends JFrame {
 		Container c = getContentPane();
 		c.setLayout(new FlowLayout());
 
-		c.add(sourseFolderLabel);
+		c.add(sourseFolderLabelButton);
 		c.add(sourse);
 		c.add(sourseFolderError);
 
-		c.add(destFolderLabel);
+		c.add(destFolderLabelButton);
 		c.add(dest);
 		c.add(destFolderError);
 
-		c.add(tempFolderLabel);
+		c.add(tempFolderLabelButton);
 		c.add(temp);
 		c.add(tempFolderError);
 
@@ -165,7 +181,7 @@ public class AddConfigWindow extends JFrame {
 
 		@Override
 		public void actionPerformed(ActionEvent addAction) {
-
+			
 			String[] informationFromElements = new String[6];
 			if (readAndValidInformationFromElements(informationFromElements)) {
 
@@ -292,5 +308,14 @@ public class AddConfigWindow extends JFrame {
 				return false;
 			}
 		}
+	}
+	
+	private class ChooseFolderListener implements ActionListener{
+
+		@Override
+		public void actionPerformed(ActionEvent e) {			
+			new FileTree(AddConfigWindow.this, e.getSource());			
+		}
+		
 	}
 }
