@@ -43,6 +43,10 @@ public class FileArchiverMain {
 		//File archiverConfigXml = new File(pathToJarFile + "configArchiver.xml");
 
 		File archiverConfigXml = new File(PathToConfigFiles.PATH_TO_CONFIG_FILES + "configArchiver.xml");
+		if(!archiverConfigXml.exists()){
+			System.out.println("Configuratin file for file archiver does not exist");
+			return;
+		}
 		ArrayList<Entry> configuration = Helper
 				.readFromConfigArchiverXml(archiverConfigXml);
 
