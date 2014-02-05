@@ -17,13 +17,7 @@
 	<fileSets>
 		<fileSet>
 			<directory>${project.basedir}/target/classes</directory>
-			<outputDirectory>/</outputDirectory>
-			<excludes>
-				<exclude>**/configarchiver/*</exclude>
-				<exclude>**/configarchiver</exclude>
-				<exclude>**/images/*</exclude>
-				<exclude>**/images</exclude>
-			</excludes>
+			<outputDirectory>/</outputDirectory>			
 		</fileSet>
 	</fileSets>
 </assembly>

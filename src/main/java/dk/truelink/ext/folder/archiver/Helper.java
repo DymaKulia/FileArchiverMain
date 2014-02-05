@@ -1,4 +1,4 @@
-package dk.truelink.ext.folder.common;
+package dk.truelink.ext.folder.archiver;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,33 +15,13 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 public class Helper {
-
-	public static String findPathToJar(Object classFromJar) {
-		String path = classFromJar.getClass().getProtectionDomain()
-				.getCodeSource().getLocation().getFile();
-		String pathDecode = "";
-		try {
-			pathDecode = URLDecoder.decode(path, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			new RuntimeException(e);
-		}
-
-		StringTokenizer st = new StringTokenizer(pathDecode, "/");
-		int countTokens = st.countTokens();
-		for (int i = 1; i < countTokens; i++) {
-			st.nextToken();
-		}
-		String nameFile = st.nextToken();
-		return pathDecode.substring(0, pathDecode.length()
-				- (nameFile.length()));//!!(+1 maybe need) may be reason of incorrect file path
-	}
-
-	public static String[] readFromMailXml(File mailXml) {
+	
+	public static String[] readMailConfigs(File configXml) {
 
 		DocumentBuilder builder = DocumentBuilderCreator.getInstance();
 		org.w3c.dom.Document doc = null;
 		try {
-			doc = builder.parse(new FileInputStream(mailXml));
+			doc = builder.parse(new FileInputStream(configXml));
 		} catch (FileNotFoundException e1) {
 			new RuntimeException(e1);
 		} catch (SAXException e1) {
@@ -66,7 +46,7 @@ public class Helper {
 		return fromMailXml;
 	}
 
-	public static ArrayList<Entry> readFromConfigArchiverXml(
+	public static ArrayList<Entry> readArchivationConfigs(
 			File configArchiverXml) {
 
 		DocumentBuilder builder = DocumentBuilderCreator.getInstance();

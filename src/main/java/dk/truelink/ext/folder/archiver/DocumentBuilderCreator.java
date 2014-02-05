@@ -1,4 +1,4 @@
-package dk.truelink.ext.folder.common;
+package dk.truelink.ext.folder.archiver;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;

@@ -18,10 +18,6 @@ import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import dk.truelink.ext.folder.common.Entry;
-import dk.truelink.ext.folder.common.Helper;
-import dk.truelink.ext.folder.common.PathToConfigFiles;
-
 public class FileArchiverMain {
 
 	private static final String LOCK_FILENAME = "fileArchiver.lock";
@@ -35,20 +31,28 @@ public class FileArchiverMain {
 	private static final FileFilter folderFilter = new FolderFileFilter();
 	private static int ageModify;
 	private static long marginMemory = 100000000;
+	private static String pathToConfiguratioFile;
 
 	public static void main(String[] args) {
 
-		//Helper helper = new Helper();
-		//String pathToJarFile = Helper.findPathToJar(helper);
-		//File archiverConfigXml = new File(pathToJarFile + "configArchiver.xml");
+		if (args.length == 0) {
+			System.out.println("Unknown path to configuration file");
+			return;
+		} else if (args.length >= 2) {
+			System.out.println("To mach input parameters");
+			return;
+		}
+		
+		pathToConfiguratioFile = args[0];
 
-		File archiverConfigXml = new File(PathToConfigFiles.PATH_TO_CONFIG_FILES + "configArchiver.xml");
-		if(!archiverConfigXml.exists()){
-			System.out.println("Configuratin file for file archiver does not exist");
+		File archiverConfigXml = new File(args[0]);
+		if (!archiverConfigXml.exists()) {
+			System.out
+					.println("Configuration file for archiver does not exist");
 			return;
 		}
 		ArrayList<Entry> configuration = Helper
-				.readFromConfigArchiverXml(archiverConfigXml);
+				.readArchivationConfigs(archiverConfigXml);
 
 		for (int i = 0; i < configuration.size(); i++) {
 
@@ -83,7 +87,7 @@ public class FileArchiverMain {
 
 			ageModify = Integer.parseInt(entry.getAgeModify()) * -1;
 			try {
-				System.out.println(inArgs.length+ "inArgs.length");
+				System.out.println(inArgs.length + "inArgs.length");
 				mainArchiverMethod(inArgs);
 			} catch (Exception ex) {
 				System.out.println("Archive prosess with inner parameters ");
@@ -95,6 +99,13 @@ public class FileArchiverMain {
 			}
 
 		}
+
+		/*
+		 * EMailNotifier mailNotifier = new EMailNotifier("smtp.gmail.com", 587,
+		 * "d.kylay@gmail.com", "121988dymakulia");
+		 * mailNotifier.sendMail("d.kylay@gmail.com", "Logs archiver",
+		 * "TEST TEST TEST");
+		 */
 	}
 
 	public static void mainArchiverMethod(String[] args) {
@@ -132,7 +143,7 @@ public class FileArchiverMain {
 					if (lockFileLock == null) {
 						System.out
 								.println("Program has been already started. Found lock file in destination folder '"
-										+ lockFile.getAbsolutePath() + "'");						
+										+ lockFile.getAbsolutePath() + "'");
 						throw new RuntimeException("lockFileLock == null");
 					}
 
@@ -207,38 +218,38 @@ public class FileArchiverMain {
 		if (!sourceFolder.exists() || !sourceFolder.isDirectory()) {
 			System.out.println("Source folder "
 					+ sourceFolder.getAbsolutePath()
-					+ " does not exist or is not a directory");			
+					+ " does not exist or is not a directory");
 			throw new RuntimeException();
 		}
 		if (!destFolder.exists() || !destFolder.isDirectory()) {
 			System.out.println("Destination folder "
 					+ destFolder.getAbsolutePath()
-					+ " does not exist or is not a directory");			
+					+ " does not exist or is not a directory");
 			throw new RuntimeException();
 		}
 		if (!tempFolder.exists() || !tempFolder.isDirectory()) {
 			System.out.println("Temporary folder "
 					+ tempFolder.getAbsolutePath()
-					+ " does not exist or is not a directory");			
+					+ " does not exist or is not a directory");
 			throw new RuntimeException();
 		}
 
 		if (sourceFolder.getAbsolutePath().equals(destFolder.getAbsolutePath())) {
 			System.out.println("Source " + sourceFolder.getAbsolutePath()
 					+ " and destination " + destFolder.getAbsolutePath()
-					+ "  folders must not be the same");			
+					+ "  folders must not be the same");
 			throw new RuntimeException();
 		}
 		if (tempFolder.getAbsolutePath().equals(destFolder.getAbsolutePath())) {
 			System.out.println("Temporary " + tempFolder.getAbsolutePath()
 					+ " and destination " + destFolder.getAbsolutePath()
-					+ "  folders must not be the same");			
+					+ "  folders must not be the same");
 			throw new RuntimeException();
 		}
 		if (sourceFolder.getAbsolutePath().equals(tempFolder.getAbsolutePath())) {
 			System.out.println("Source " + sourceFolder.getAbsolutePath()
 					+ " and temporary " + tempFolder.getAbsolutePath()
-					+ "  folders must not be the same");			
+					+ "  folders must not be the same");
 			throw new RuntimeException();
 		}
 	}
@@ -272,8 +283,8 @@ public class FileArchiverMain {
 
 			System.out.println("Check available disk space");
 
-			checkAvailableDiskSpace(sourceFolder, tempFolder,
-					noSubFolderScan, destFolder);
+			checkAvailableDiskSpace(sourceFolder, tempFolder, noSubFolderScan,
+					destFolder);
 
 			System.out.print("\t1.Moving files to temp sub folder '"
 					+ tempSubFolderName + "' ... ");
@@ -340,8 +351,7 @@ public class FileArchiverMain {
 	}
 
 	private static void checkAvailableDiskSpace(File sourceFolder,
-			File tempFolder, boolean noSubFolderScan,
-			File destFolder) {
+			File tempFolder, boolean noSubFolderScan, File destFolder) {
 
 		final File[] fileArray = sourceFolder.listFiles();
 		long sizeFiles = calculateSizeFiles(fileArray, noSubFolderScan);
@@ -378,15 +388,15 @@ public class FileArchiverMain {
 
 	private static long calculateSizeFiles(File[] fileArray,
 			boolean noSubFolderScan) {
-		
+
 		long sizeFiles = 0;
 		for (int i = 0; i < fileArray.length; i++) {
-			if(fileArray[i].isDirectory()){
-				if(!noSubFolderScan){
-					
+			if (fileArray[i].isDirectory()) {
+				if (!noSubFolderScan) {
+
 					sizeFiles += calculateSizeFiles(fileArray[i].listFiles(),
 							noSubFolderScan);
-				}				
+				}
 			} else {
 				sizeFiles += fileArray[i].length();
 			}
@@ -660,14 +670,11 @@ public class FileArchiverMain {
 		// Mail notification module
 		String host, username, password, sendTo;
 		int port;
-		//Helper helper = new Helper();
-		//String pathToJarFile = Helper.findPathToJar(helper);
-		//File mailXml = new File(pathToJarFile + "mailXml.xml");
-		
-		File mailXml = new File(PathToConfigFiles.PATH_TO_CONFIG_FILES + "mailXml.xml");
+
+		File mailXml = new File(pathToConfiguratioFile); 
 		if (mailXml.exists()) {
 
-			String[] fromMailXml = Helper.readFromMailXml(mailXml);
+			String[] fromMailXml = Helper.readMailConfigs(mailXml);
 			host = fromMailXml[0];
 			port = Integer.parseInt(fromMailXml[1]);
 			username = fromMailXml[2];

@@ -2,36 +2,48 @@ package dk.truelink.ext.folder.archiver;
 
 import java.util.Properties;
 
-import org.springframework.mail.MailSender;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.MimeMessage;
 
 public class EMailNotifier {
-	private MailSender mailSender;
-	
-	public EMailNotifier(String host,int port, String username, String password) {
-		JavaMailSenderImpl mailSenderImpl = new JavaMailSenderImpl();
-		mailSenderImpl.setHost(host);
-		mailSenderImpl.setPort(port);
-		mailSenderImpl.setUsername(username);
-		mailSenderImpl.setPassword(password);
-		
-		Properties javaMailProperties = new Properties();
-		javaMailProperties.put("mail.smtp.auth", "true");
-		javaMailProperties.put("mail.smtp.starttls.enable", "true");
-		mailSenderImpl.setJavaMailProperties(javaMailProperties);
-		
-		
-		mailSender = mailSenderImpl;
+
+	private Properties props;
+	private String username;
+	private String password;
+
+	public EMailNotifier(String host, int port, String username, String password) {
+
+		this.username = username;
+		this.password = password;
+		props = new Properties();
+		props.put("mail.smtp.host", host);
+		props.put("mail.smtp.port", port);		
+		props.put("mail.smtp.starttls.enable", "true");
+		props.put("mail.smtp.auth", "true");		
 	}
 
-	public void sendMail(String to, String subject, String msg) {
+	public void sendMail(String to, String subject, String sendingMessage) {
 
-		SimpleMailMessage message = new SimpleMailMessage();
-		
-		message.setTo(to);
-		message.setSubject(subject);
-		message.setText(msg);
-		mailSender.send(message);
+		Session session = Session.getInstance(props,
+				new javax.mail.Authenticator() {
+			
+					protected PasswordAuthentication getPasswordAuthentication() {
+						return new PasswordAuthentication(username, password);
+					}
+				});
+
+		try {
+			MimeMessage message = new MimeMessage(session);			
+			message.setRecipients(Message.RecipientType.TO, to);
+			message.setSubject(subject);
+			message.setText(sendingMessage);
+			Transport.send(message);
+		} catch (MessagingException mex) {
+			System.out.println("send failed, exception: " + mex);
+		}
 	}
 }

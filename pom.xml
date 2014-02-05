@@ -21,13 +21,6 @@
 			<artifactId>mail</artifactId>
 			<version>1.4.3</version>
 		</dependency>
-
-		<!-- Spring framework -->
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring</artifactId>
-			<version>2.5.6</version>
-		</dependency>
 	</dependencies>
 
 	<build>
@@ -61,26 +54,7 @@
 						<goals>
 							<goal>single</goal>
 						</goals>
-					</execution>
-					
-					<execution>
-					     <id>archiverConfig</id>
-						<configuration>
-							<archive>
-								<manifest>
-									<mainClass>dk.truelink.ext.folder.configarchiver.BeginMainConfigWindow</mainClass>
-								</manifest>
-							</archive>
-							<descriptors>								
-								<descriptor>src/main/assembly/archiverConfig.xml</descriptor>
-							</descriptors>
-						</configuration>
-						<phase>package</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-					</execution>
-
+					</execution>					
 				</executions>
 			</plugin>
 		</plugins>
