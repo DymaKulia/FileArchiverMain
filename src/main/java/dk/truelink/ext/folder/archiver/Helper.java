@@ -11,42 +11,20 @@ import java.util.StringTokenizer;
 
 import javax.xml.parsers.DocumentBuilder;
 
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 public class Helper {
 	
+	private static String[] mailConfigs;
+	
 	public static String[] readMailConfigs(File configXml) {
 
-		DocumentBuilder builder = DocumentBuilderCreator.getInstance();
-		org.w3c.dom.Document doc = null;
-		try {
-			doc = builder.parse(new FileInputStream(configXml));
-		} catch (FileNotFoundException e1) {
-			new RuntimeException(e1);
-		} catch (SAXException e1) {
-			new RuntimeException(e1);
-		} catch (IOException e1) {
-			new RuntimeException(e1);
-		}
-
-		NodeList nodeListHost = doc.getElementsByTagName("host");
-		NodeList nodeListPort = doc.getElementsByTagName("port");
-		NodeList nodeListUsername = doc.getElementsByTagName("username");
-		NodeList nodeListPassword = doc.getElementsByTagName("password");
-		NodeList nodeListSendTo = doc.getElementsByTagName("sendTo");
-
-		String[] fromMailXml = new String[5];
-		fromMailXml[0] = nodeListHost.item(0).getTextContent();
-		fromMailXml[1] = nodeListPort.item(0).getTextContent();
-		fromMailXml[2] = nodeListUsername.item(0).getTextContent();
-		fromMailXml[3] = nodeListPassword.item(0).getTextContent();
-		fromMailXml[4] = nodeListSendTo.item(0).getTextContent();
-
-		return fromMailXml;
+		return mailConfigs;
 	}
 
-	public static ArrayList<Entry> readArchivationConfigs(
+	public static ArrayList<Task> readArchivationConfigs(
 			File configArchiverXml) {
 
 		DocumentBuilder builder = DocumentBuilderCreator.getInstance();
@@ -61,28 +39,119 @@ public class Helper {
 			new RuntimeException(e1);
 		}
 
-		ArrayList<Entry> configuration = new ArrayList<Entry>();
-
-		NodeList nodeListSourseFolder = doc.getElementsByTagName("sourse_folder");
-		NodeList nodeListDestFolder = doc.getElementsByTagName("dest_folder");
-		NodeList nodeListTempFolder = doc.getElementsByTagName("temp_folder");
-		NodeList nodeListAgeModify = doc.getElementsByTagName("age_modify");
-		NodeList nodeListGzip = doc.getElementsByTagName("gzip");
-		NodeList nodeListNoSubFolderScan = doc.getElementsByTagName("noSubFolderScan");
-
-		for (int i = 0; i < nodeListSourseFolder.getLength(); i++) {
-
+		ArrayList<Task> configuration = new ArrayList<Task>();
+		
+		//Read global configurations
+		Task globalTask = new Task();		
+		NodeList globals = doc.getElementsByTagName("global");
+		Node global = globals.item(0);
+		NodeList globalOptions = global.getChildNodes();		
+		fillTask(globalTask, globalOptions);			
+		
+		//Read each task configurations
+		NodeList allTasks = doc.getElementsByTagName("task");
+		
+		for (int i = 0; i < allTasks.getLength(); i++) {
 			
-			Entry entry = new Entry();
-			entry.setSourseFolder(nodeListSourseFolder.item(i).getTextContent());
-			entry.setDestFolder(nodeListDestFolder.item(i).getTextContent());
-			entry.setTempFolder(nodeListTempFolder.item(i).getTextContent());
-			entry.setAgeModify(nodeListAgeModify.item(i).getTextContent());
-			entry.setGzip(nodeListGzip.item(i).getTextContent());
-			entry.setNoSubFolderScan(nodeListNoSubFolderScan.item(i).getTextContent());
-			configuration.add(entry);
-		}
+			Task task = new Task();			
+			Node nodeTask = allTasks.item(i);
+			
+			if (nodeTask.getAttributes().getNamedItem("sourceFolder") == null) {
+				if (nodeTask.getAttributes().getNamedItem("id") == null) {
+					System.out.println(i + " in task order do not have mandatory sourceFolder attribute");
+					throw new RuntimeException();
+				} else {
+					System.out.println("Task with id: \"" + nodeTask.getAttributes().getNamedItem("id")
+									+ "\" do not have mandatory sourceFolder attribute");
+					throw new RuntimeException();
+				}
+			} else {
+				task.setSourseFolder(nodeTask.getAttributes().getNamedItem("sourceFolder").getNodeValue());
+				
+				if(nodeTask.getAttributes().getNamedItem("id") == null){
+					task.setId(nodeTask.getAttributes().getNamedItem("sourceFolder").getNodeValue());
+				} else {
+					task.setId(nodeTask.getAttributes().getNamedItem("id").getNodeValue());
+				}				
+			}			
+			
+			NodeList taskOptions = nodeTask.getChildNodes();
+			fillTask(task, taskOptions);
+			
+			//Checking task after fill and if task is no filling full
+			//enter global configurations where it is need
+			if (task.getDestFolder() == null) {                
+				//
+				task.setDestFolder(globalTask.getDestFolder());
+			}
+			if (task.getTempFolder() == null) {
+				//
+			}
+			if (task.getAgeModify() == null) {
+				//
+			}
+			if (task.getGzip() == null) {
+				//
+			}
+			if (task.getNeedCleanSource() == null) {
+				//
+			}
+			if (task.getNoSubFolderScan() == null) {
+				//
+			}
 
+			if (configuration.contains(task)) {
+				System.out.println(i + " in task order have not unique name");
+				throw new RuntimeException();
+			} else {
+				configuration.add(task);
+			}
+		}
+		
 		return configuration;
+	}
+	
+	private static void fillTask(Task task, NodeList options){
+		
+		for (int i = 0; i < options.getLength(); i++) {
+			Node option = options.item(i);
+
+			switch (option.getAttributes().getNamedItem("name").getNodeValue()) {
+
+			case "destFolder":
+				task.setAgeModify(option.getTextContent());
+				break;
+				
+			case "tempFolder":
+				task.setTempFolder(option.getTextContent());
+				break;
+				
+			case "cleanSource":
+				task.setNeedCleanSource(option.getTextContent());
+				break;
+
+			case "noSubfolderScan":
+				task.setNoSubFolderScan(option.getTextContent());
+				break;
+
+			case "daysAgoOfLastModify":
+				task.setAgeModify(option.getTextContent());
+				break;
+
+			case "useGzip":
+				task.setGzip(option.getTextContent());
+				break;
+				
+			case "mail":
+				NodeList mailNodes = option.getChildNodes();
+				mailConfigs = new String[5];
+				mailConfigs[0] = mailNodes.item(0).getTextContent();
+				mailConfigs[1] = mailNodes.item(1).getTextContent();
+				mailConfigs[2] = mailNodes.item(2).getTextContent();
+				mailConfigs[3] = mailNodes.item(3).getTextContent();
+				mailConfigs[4] = mailNodes.item(4).getTextContent();				
+				break;					
+			}
+		}
 	}
 }

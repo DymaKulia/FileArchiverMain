@@ -31,27 +31,43 @@ public class FileArchiverMain {
 	private static final FileFilter folderFilter = new FolderFileFilter();
 	private static int ageModify;
 	private static long marginMemory = 100000000;
-	private static String pathToConfiguratioFile;
+	private static String pathToConfigurationFile;
 
 	public static void main(String[] args) {
 
 		if (args.length == 0) {
 			System.out.println("Unknown path to configuration file");
+			System.out.println("Use pattern Archiver-0.0.1-all.jar <path to "
+					+ "configuration file> for execution mode");
+			System.out.println("Or use pattern Archiver-0.0.1-all.jar <path to "
+					+ "configuration file> <check> for configuration checking mode");
 			return;
-		} else if (args.length >= 2) {
-			System.out.println("To mach input parameters");
+		} else if (args.length > 2) {
+			System.out.println("Too much input parameters");
 			return;
+		} else if (args.length == 2) {
+			if (args[1].equals("check")) {
+				// Do check of archiver configuration and print it
+				try {
+					Checker.checkAllArchiverConfiguration(args[0]);
+					return;
+				} catch (Exception ex) {
+					System.out.println("Cheking is aborted");
+				}
+			} else {
+				System.out.println("Unknown parameter " + args[1]);
+			}
 		}
-		
-		pathToConfiguratioFile = args[0];
 
-		File archiverConfigXml = new File(args[0]);
+		pathToConfigurationFile = args[0];
+
+		File archiverConfigXml = new File(pathToConfigurationFile);
 		if (!archiverConfigXml.exists()) {
 			System.out
 					.println("Configuration file for archiver does not exist");
 			return;
 		}
-		ArrayList<Entry> configuration = Helper
+		ArrayList<Task> configuration = Helper
 				.readArchivationConfigs(archiverConfigXml);
 
 		for (int i = 0; i < configuration.size(); i++) {
@@ -59,33 +75,40 @@ public class FileArchiverMain {
 			/*
 			 * Create inArgs from configuration items and set ageModify
 			 */
-			Entry entry = configuration.get(i);
+			Task task = configuration.get(i);
 			int countInArgs = 3;
 
-			if (entry.getGzip().equals("true")) {
+			if (task.getGzip().equals("true")) {
 				countInArgs++;
 			}
-			if (entry.getNoSubFolderScan().equals("true")) {
+			if (task.getNoSubFolderScan().equals("true")) {
+				countInArgs++;
+			}
+			if (task.getNeedCleanSource().equals("true")) {
 				countInArgs++;
 			}
 
 			int index = 0;
 			String[] inArgs = new String[countInArgs];
-			inArgs[index] = entry.getSourseFolder();
+			inArgs[index] = task.getSourceFolder();
 			index++;
-			inArgs[index] = entry.getDestFolder();
+			inArgs[index] = task.getDestFolder();
 			index++;
-			inArgs[index] = entry.getTempFolder();
-			if (entry.getGzip().equals("true")) {
+			inArgs[index] = task.getTempFolder();
+			if (task.getGzip().equals("true")) {
 				index++;
 				inArgs[index] = GZIP_PARAM;
 			}
-			if (entry.getNoSubFolderScan().equals("true")) {
+			if (task.getNoSubFolderScan().equals("true")) {
 				index++;
 				inArgs[index] = NO_SUBFOLDER_SCAN_PARAM;
 			}
+			if (task.getNeedCleanSource().equals("true")) {
+				index++;
+				inArgs[index] = CLEAN_SOURCE_PARAM;
+			}
 
-			ageModify = Integer.parseInt(entry.getAgeModify()) * -1;
+			ageModify = Integer.parseInt(task.getAgeModify()) * -1;
 			try {
 				System.out.println(inArgs.length + "inArgs.length");
 				mainArchiverMethod(inArgs);
@@ -99,13 +122,6 @@ public class FileArchiverMain {
 			}
 
 		}
-
-		/*
-		 * EMailNotifier mailNotifier = new EMailNotifier("smtp.gmail.com", 587,
-		 * "d.kylay@gmail.com", "121988dymakulia");
-		 * mailNotifier.sendMail("d.kylay@gmail.com", "Logs archiver",
-		 * "TEST TEST TEST");
-		 */
 	}
 
 	public static void mainArchiverMethod(String[] args) {
@@ -128,8 +144,7 @@ public class FileArchiverMain {
 		File sourceFolder = new File(source);
 		File destFolder = new File(dest);
 		File tempFolder = new File(temp);
-
-		checkArgs(sourceFolder, destFolder, tempFolder);
+		Checker.checkTaskConfiguration(sourceFolder, destFolder, tempFolder, false);		
 
 		final File lockFile = new File(destFolder, LOCK_FILENAME);
 		lockFile.delete();
@@ -211,47 +226,6 @@ public class FileArchiverMain {
 			}
 		}
 		return extParams;
-	}
-
-	private static void checkArgs(File sourceFolder, File destFolder,
-			File tempFolder) {
-		if (!sourceFolder.exists() || !sourceFolder.isDirectory()) {
-			System.out.println("Source folder "
-					+ sourceFolder.getAbsolutePath()
-					+ " does not exist or is not a directory");
-			throw new RuntimeException();
-		}
-		if (!destFolder.exists() || !destFolder.isDirectory()) {
-			System.out.println("Destination folder "
-					+ destFolder.getAbsolutePath()
-					+ " does not exist or is not a directory");
-			throw new RuntimeException();
-		}
-		if (!tempFolder.exists() || !tempFolder.isDirectory()) {
-			System.out.println("Temporary folder "
-					+ tempFolder.getAbsolutePath()
-					+ " does not exist or is not a directory");
-			throw new RuntimeException();
-		}
-
-		if (sourceFolder.getAbsolutePath().equals(destFolder.getAbsolutePath())) {
-			System.out.println("Source " + sourceFolder.getAbsolutePath()
-					+ " and destination " + destFolder.getAbsolutePath()
-					+ "  folders must not be the same");
-			throw new RuntimeException();
-		}
-		if (tempFolder.getAbsolutePath().equals(destFolder.getAbsolutePath())) {
-			System.out.println("Temporary " + tempFolder.getAbsolutePath()
-					+ " and destination " + destFolder.getAbsolutePath()
-					+ "  folders must not be the same");
-			throw new RuntimeException();
-		}
-		if (sourceFolder.getAbsolutePath().equals(tempFolder.getAbsolutePath())) {
-			System.out.println("Source " + sourceFolder.getAbsolutePath()
-					+ " and temporary " + tempFolder.getAbsolutePath()
-					+ "  folders must not be the same");
-			throw new RuntimeException();
-		}
 	}
 
 	/**
@@ -369,7 +343,7 @@ public class FileArchiverMain {
 				System.out.println("Cannot send Email");
 				System.out.println(e);
 			}
-			throw new RuntimeException("do not have enough disc memory");
+			throw new RuntimeException("do not have enough temp folder disc memory");
 		}
 
 		if (sizeFiles + marginMemory >= destFolder.getFreeSpace()) {
@@ -380,10 +354,14 @@ public class FileArchiverMain {
 					+ " with dest folder is "
 					+ destFolder.getFreeSpace()
 					+ " Bytes";
-			sendEmail(message);
-			throw new RuntimeException("do not have enough disc memory");
+			try {
+				sendEmail(message);
+			} catch (Exception e) {
+				System.out.println("Cannot send Email");
+				System.out.println(e);
+			}
+			throw new RuntimeException("do not have enough dest folder disc memory");
 		}
-
 	}
 
 	private static long calculateSizeFiles(File[] fileArray,
@@ -671,7 +649,7 @@ public class FileArchiverMain {
 		String host, username, password, sendTo;
 		int port;
 
-		File mailXml = new File(pathToConfiguratioFile); 
+		File mailXml = new File(pathToConfigurationFile);
 		if (mailXml.exists()) {
 
 			String[] fromMailXml = Helper.readMailConfigs(mailXml);

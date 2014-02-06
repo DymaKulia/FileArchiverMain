@@ -39,7 +39,7 @@
 				<artifactId>maven-assembly-plugin</artifactId>
 				<executions>
 					<execution>
-					    <id>archiver</id>
+					    <id>all</id>
 						<configuration>
 							<archive>
 								<manifest>
