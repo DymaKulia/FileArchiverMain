@@ -4,10 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.StringTokenizer;
 
 import javax.xml.parsers.DocumentBuilder;
 
@@ -19,7 +16,7 @@ public class Helper {
 	
 	private static String[] mailConfigs;
 	
-	public static String[] readMailConfigs(File configXml) {
+	public static String[] readMailConfigs() {
 
 		return mailConfigs;
 	}
@@ -45,8 +42,8 @@ public class Helper {
 		Task globalTask = new Task();		
 		NodeList globals = doc.getElementsByTagName("global");
 		Node global = globals.item(0);
-		NodeList globalOptions = global.getChildNodes();		
-		fillTask(globalTask, globalOptions);			
+		NodeList globalOptions = global.getChildNodes();
+		fillTask(globalTask, globalOptions);
 		
 		//Read each task configurations
 		NodeList allTasks = doc.getElementsByTagName("task");
@@ -61,8 +58,8 @@ public class Helper {
 					System.out.println(i + " in task order do not have mandatory sourceFolder attribute");
 					throw new RuntimeException();
 				} else {
-					System.out.println("Task with id: \"" + nodeTask.getAttributes().getNamedItem("id")
-									+ "\" do not have mandatory sourceFolder attribute");
+					System.out.println("Task with " + nodeTask.getAttributes().getNamedItem("id")
+									+ " do not have mandatory sourceFolder attribute");
 					throw new RuntimeException();
 				}
 			} else {
@@ -80,34 +77,33 @@ public class Helper {
 			
 			//Checking task after fill and if task is no filling full
 			//enter global configurations where it is need
-			if (task.getDestFolder() == null) {                
-				//
+			if (task.getDestFolder().equals("")) { 
 				task.setDestFolder(globalTask.getDestFolder());
 			}
-			if (task.getTempFolder() == null) {
-				//
+			if (task.getTempFolder().equals("")) {
+				task.setTempFolder(globalTask.getTempFolder());
 			}
-			if (task.getAgeModify() == null) {
-				//
+			if (task.getAgeModify().equals("")) {
+				task.setAgeModify(globalTask.getAgeModify());
 			}
-			if (task.getGzip() == null) {
-				//
+			if (task.getGzip().equals("")) {
+				task.setGzip(globalTask.getGzip());
 			}
-			if (task.getNeedCleanSource() == null) {
-				//
+			if (task.getNeedCleanSource().equals("")) {
+				task.setNeedCleanSource(globalTask.getNeedCleanSource());
 			}
-			if (task.getNoSubFolderScan() == null) {
-				//
+			if (task.getNoSubFolderScan().equals("")) {				
+				task.setNoSubFolderScan(globalTask.getNoSubFolderScan());
 			}
 
 			if (configuration.contains(task)) {
-				System.out.println(i + " in task order have not unique name");
+				System.out.println(i + " in task order has not unique id");
+				System.out.println("Task with id \""+task.getId()+"\" already exists");
 				throw new RuntimeException();
 			} else {
 				configuration.add(task);
 			}
-		}
-		
+		}		
 		return configuration;
 	}
 	
@@ -115,42 +111,65 @@ public class Helper {
 		
 		for (int i = 0; i < options.getLength(); i++) {
 			Node option = options.item(i);
+			
+			if (option.getNodeName().equals("option")) {
 
-			switch (option.getAttributes().getNamedItem("name").getNodeValue()) {
+				switch (option.getAttributes().getNamedItem("name")
+						.getNodeValue()) {
 
-			case "destFolder":
-				task.setAgeModify(option.getTextContent());
-				break;
-				
-			case "tempFolder":
-				task.setTempFolder(option.getTextContent());
-				break;
-				
-			case "cleanSource":
-				task.setNeedCleanSource(option.getTextContent());
-				break;
+				case "destFolder":
+					task.setDestFolder(option.getTextContent());
+					break;
 
-			case "noSubfolderScan":
-				task.setNoSubFolderScan(option.getTextContent());
-				break;
+				case "tempFolder":
+					task.setTempFolder(option.getTextContent());
+					break;
 
-			case "daysAgoOfLastModify":
-				task.setAgeModify(option.getTextContent());
-				break;
+				case "cleanSource":
+					task.setNeedCleanSource(option.getTextContent());
+					break;
 
-			case "useGzip":
-				task.setGzip(option.getTextContent());
-				break;
-				
-			case "mail":
-				NodeList mailNodes = option.getChildNodes();
-				mailConfigs = new String[5];
-				mailConfigs[0] = mailNodes.item(0).getTextContent();
-				mailConfigs[1] = mailNodes.item(1).getTextContent();
-				mailConfigs[2] = mailNodes.item(2).getTextContent();
-				mailConfigs[3] = mailNodes.item(3).getTextContent();
-				mailConfigs[4] = mailNodes.item(4).getTextContent();				
-				break;					
+				case "noSubfolderScan":
+					task.setNoSubFolderScan(option.getTextContent());
+					break;
+
+				case "daysAgoOfLastModify":
+					task.setAgeModify(option.getTextContent());
+					break;
+
+				case "useGzip":
+					task.setGzip(option.getTextContent());
+					break;
+
+				case "mail":
+					NodeList mailNodes = option.getChildNodes();
+					mailConfigs = new String[5];
+					
+					for (int k = 0; k < mailNodes.getLength(); k++) {
+
+						Node mailConf = mailNodes.item(k);
+						
+						switch (mailConf.getNodeName()) {
+
+						case "host":
+							mailConfigs[0] = mailConf.getTextContent();
+							break;
+						case "port":
+							mailConfigs[1] = mailConf.getTextContent();
+							break;
+						case "username":
+							mailConfigs[2] = mailConf.getTextContent();
+							break;
+						case "password":
+							mailConfigs[3] = mailConf.getTextContent();
+							break;
+						case "sendTo":
+							mailConfigs[4] = mailConf.getTextContent();
+							break;
+						}
+					}
+					break;
+				}
 			}
 		}
 	}

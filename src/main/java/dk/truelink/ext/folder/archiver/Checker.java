@@ -8,7 +8,9 @@ public class Checker {
 	public static void checkAllArchiverConfiguration(
 			String pathToConfigurationFile) {
 		
-		System.out.println("Start checking ...");
+		System.out.println("");
+		System.out.println("---------- START CHECKING -------------");
+		System.out.println("");
 
 		File archiverConfigXml = new File(pathToConfigurationFile);
 		if (!archiverConfigXml.exists()) {
@@ -38,20 +40,18 @@ public class Checker {
 				File tempFolder = new File(configuration.get(i).getTempFolder());
 				
 				int countWarnings = checkTaskConfiguration(sourceFolder, destFolder, tempFolder, true);
-
+				System.out.println("");
 				if (countWarnings == 0) {
 					System.out.println("NO WARNINGS! TASK IS AVAILABLE!");
+					System.out.println("");
 				} else {
 					System.out.println("COUNT WARNINGS IS " + countWarnings);
 					System.out.println("PLEASE CHECK CONFIGURATION OF TASK WITH ID "
 									+ configuration.get(i).getId());
+					System.out.println("");
 				}
 			}
-			
-			
-
 		}
-
 	}
 
 	public static int checkTaskConfiguration(File sourceFolder,
@@ -60,8 +60,9 @@ public class Checker {
 		int countWarnings = 0;
 		
 		if (!sourceFolder.exists() || !sourceFolder.isDirectory()) {
+			System.out.println("");
 			System.out.println("WARNING: source folder "
-					+ sourceFolder.getAbsolutePath()
+					+ sourceFolder.getPath()
 					+ " does not exist or is not a directory");
 			
 			countWarnings++;
@@ -70,8 +71,9 @@ public class Checker {
 			}
 		}
 		if (!destFolder.exists() || !destFolder.isDirectory()) {
+			System.out.println("");
 			System.out.println("WARNING: destination folder "
-					+ destFolder.getAbsolutePath()
+					+ destFolder.getPath()
 					+ " does not exist or is not a directory");
 			
 			countWarnings++;
@@ -80,8 +82,9 @@ public class Checker {
 			}
 		}
 		if (!tempFolder.exists() || !tempFolder.isDirectory()) {
+			System.out.println("");
 			System.out.println("WARNING: temporary folder "
-					+ tempFolder.getAbsolutePath()
+					+ tempFolder.getPath()
 					+ " does not exist or is not a directory");
 			
 			countWarnings++;
@@ -89,35 +92,56 @@ public class Checker {
 				throw new RuntimeException();
 			}
 		}
+		
+		if (!(sourceFolder.getPath().equals("") || destFolder.getPath().equals(""))) {
 
-		if (sourceFolder.getAbsolutePath().equals(destFolder.getAbsolutePath())) {
-			System.out.println("WARNING: source " + sourceFolder.getAbsolutePath()
-					+ " and destination " + destFolder.getAbsolutePath()
-					+ "  folders must not be the same");
-			
-			countWarnings++;
-			if (!checkerMode) {
-				throw new RuntimeException();
+			if (sourceFolder.getAbsolutePath().equals(
+					destFolder.getAbsolutePath())) {
+
+				System.out.println("");
+				System.out.println("WARNING: source "
+						+ sourceFolder.getAbsolutePath() + " and destination "
+						+ destFolder.getAbsolutePath()
+						+ "  folders must not be the same");
+
+				countWarnings++;
+				if (!checkerMode) {
+					throw new RuntimeException();
+				}
 			}
 		}
-		if (tempFolder.getAbsolutePath().equals(destFolder.getAbsolutePath())) {
-			System.out.println("WARNING: temporary " + tempFolder.getAbsolutePath()
-					+ " and destination " + destFolder.getAbsolutePath()
-					+ "  folders must not be the same");
+		
+		if (!(tempFolder.getPath().equals("") || destFolder.getPath().equals(""))) {
 			
-			countWarnings++;
-			if (!checkerMode) {
-				throw new RuntimeException();
+			if (tempFolder.getAbsolutePath().equals(
+					destFolder.getAbsolutePath())) {
+				System.out.println("");
+				System.out.println("WARNING: temporary "
+						+ tempFolder.getAbsolutePath() + " and destination "
+						+ destFolder.getAbsolutePath()
+						+ "  folders must not be the same");
+
+				countWarnings++;
+				if (!checkerMode) {
+					throw new RuntimeException();
+				}
 			}
 		}
-		if (sourceFolder.getAbsolutePath().equals(tempFolder.getAbsolutePath())) {
-			System.out.println("WARNING: source " + sourceFolder.getAbsolutePath()
-					+ " and temporary " + tempFolder.getAbsolutePath()
-					+ "  folders must not be the same");
+		
+		if (!(sourceFolder.getPath().equals("") || tempFolder.getPath().equals(""))) {
 			
-			countWarnings++;
-			if (!checkerMode) {
-				throw new RuntimeException();
+			if (sourceFolder.getAbsolutePath().equals(
+					tempFolder.getAbsolutePath())) {
+				System.out.println("");
+				System.out.println("WARNING: source "
+						+ sourceFolder.getAbsolutePath() + " and temporary "
+						+ tempFolder.getAbsolutePath()
+						+ "  folders must not be the same");
+
+				countWarnings++;
+				if (!checkerMode) {
+					throw new RuntimeException();
+				}
 			}
 		}
 		

@@ -12,6 +12,9 @@ public class Task {
 	private String needCleanSource;
 
 	public String getSourceFolder() {
+		if(sourceFolder == null){
+			return "";
+		}
 		return sourceFolder;
 	}
 
@@ -20,6 +23,9 @@ public class Task {
 	}
 
 	public String getTempFolder() {
+		if(tempFolder == null){
+			return "";
+		}
 		return tempFolder;
 	}
 
@@ -28,6 +34,9 @@ public class Task {
 	}
 
 	public String getDestFolder() {
+		if(destFolder == null){
+			return "";
+		}
 		return destFolder;
 	}
 
@@ -36,6 +45,9 @@ public class Task {
 	}
 
 	public String getAgeModify() {
+		if(ageModify == null){
+			return "";
+		}
 		return ageModify;
 	}
 
@@ -44,6 +56,9 @@ public class Task {
 	}
 
 	public String getGzip() {
+		if(gzip == null){
+			return "false";
+		}
 		return gzip;
 	}
 
@@ -52,6 +67,9 @@ public class Task {
 	}
 
 	public String getNoSubFolderScan() {
+		if(noSubFolderScan == null){
+			return "false";
+		}
 		return noSubFolderScan;
 	}
 
@@ -60,6 +78,9 @@ public class Task {
 	}
 
 	public String getNeedCleanSource() {
+		if(needCleanSource == null){
+			return "false";
+		}
 		return needCleanSource;
 	}
 
@@ -68,6 +89,9 @@ public class Task {
 	}
 
 	public String getId() {
+		if(id == null){
+			return "";
+		}
 		return id;
 	}
 
@@ -86,6 +110,14 @@ public class Task {
 
 			return false;
 		}
+	}
+	@Override
+	public String toString() {
+		
+		return "id: " + id + " sourceFolder: " + sourceFolder + " tempFolder: "
+				+ tempFolder + " destFolder: " + destFolder + " ageModify: "
+				+ ageModify + " gzip: " + gzip + " noSubFolderScan: "
+				+ noSubFolderScan + " needCleanSource: " + needCleanSource;
 	}
 
 }

@@ -34,25 +34,38 @@ public class FileArchiverMain {
 	private static String pathToConfigurationFile;
 
 	public static void main(String[] args) {
-
+		
 		if (args.length == 0) {
 			System.out.println("Unknown path to configuration file");
-			System.out.println("Use pattern Archiver-0.0.1-all.jar <path to "
+			System.out.println("Use pattern: java -jar Archiver-0.0.1-all.jar <path to "
 					+ "configuration file> for execution mode");
-			System.out.println("Or use pattern Archiver-0.0.1-all.jar <path to "
+			System.out.println("Or use pattern: java -jar Archiver-0.0.1-all.jar <path to "
 					+ "configuration file> <check> for configuration checking mode");
 			return;
 		} else if (args.length > 2) {
 			System.out.println("Too much input parameters");
 			return;
 		} else if (args.length == 2) {
+			
 			if (args[1].equals("check")) {
+				
 				// Do check of archiver configuration and print it
 				try {
 					Checker.checkAllArchiverConfiguration(args[0]);
+					String[] mail = Helper.readMailConfigs();
+					System.out.println("-----mail cofiguration-------");
+					if (mail == null) {
+						System.out.println("NO MAIL CONFIGURATIONS");
+					} else {
+						String[] mailNames = {"host","port","username","password","sendTo"};						
+						for (int i = 0; i < mail.length; i++) {
+							System.out.println(mailNames[i]+": "+mail[i]);
+						}
+					}
 					return;
 				} catch (Exception ex) {
-					System.out.println("Cheking is aborted");
+					System.out.println("Cheking is aborted");					
+					return;
 				}
 			} else {
 				System.out.println("Unknown parameter " + args[1]);
@@ -67,6 +80,7 @@ public class FileArchiverMain {
 					.println("Configuration file for archiver does not exist");
 			return;
 		}
+		
 		ArrayList<Task> configuration = Helper
 				.readArchivationConfigs(archiverConfigXml);
 
@@ -111,6 +125,10 @@ public class FileArchiverMain {
 			ageModify = Integer.parseInt(task.getAgeModify()) * -1;
 			try {
 				System.out.println(inArgs.length + "inArgs.length");
+				for (int ii = 0; ii < inArgs.length; ii++) {
+					System.out.print(inArgs[ii]+" ");
+				}
+				
 				mainArchiverMethod(inArgs);
 			} catch (Exception ex) {
 				System.out.println("Archive prosess with inner parameters ");
@@ -120,7 +138,6 @@ public class FileArchiverMain {
 				System.out.println("is aborted");
 				System.out.println(ex);
 			}
-
 		}
 	}
 
@@ -425,10 +442,11 @@ public class FileArchiverMain {
 					if (cleanSource) {
 						File[] listFiles = currentFolder
 								.listFiles(filesOnlyFilter);
+						
 						if (listFiles == null || listFiles.length == 0) {
 							if (currentFolder != null
 									&& (!currentFolder.delete() || currentFolder
-											.exists())) {
+											.exists())) {								
 								/*
 								 * IMPORTANT!
 								 * 
@@ -648,11 +666,8 @@ public class FileArchiverMain {
 		// Mail notification module
 		String host, username, password, sendTo;
 		int port;
-
-		File mailXml = new File(pathToConfigurationFile);
-		if (mailXml.exists()) {
-
-			String[] fromMailXml = Helper.readMailConfigs(mailXml);
+		
+			String[] fromMailXml = Helper.readMailConfigs();
 			host = fromMailXml[0];
 			port = Integer.parseInt(fromMailXml[1]);
 			username = fromMailXml[2];
@@ -661,8 +676,7 @@ public class FileArchiverMain {
 
 			EMailNotifier mailNotifier = new EMailNotifier(host, port,
 					username, password);
-			mailNotifier.sendMail(sendTo, "Logs archiver", message);
-		}
+			mailNotifier.sendMail(sendTo, "Logs archiver", message);		
 		//
 	}
 
