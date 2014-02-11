@@ -5,13 +5,8 @@ import java.util.Map;
 
 public enum Option {
 
-	DEST_FOLDER("destFolder"), 
-	TEMP_FOLDER("tempFolder"),
-	CLEAN_SOURSE("cleanSource"), 
-	NO_SUBFOLDER_SCAN("noSubfolderScan"),
-	DAYS_AGO_OF_LAST_MODIFY("daysAgoOfLastModify"),
-	USE_GZIP("useGzip"), 
-	MAIL("mail");
+	DEST_FOLDER("destFolder"), TEMP_FOLDER("tempFolder"), CLEAN_SOURSE("cleanSource"), NO_SUBFOLDER_SCAN("noSubfolderScan"), DAYS_AGO_OF_LAST_MODIFY("daysAgoOfLastModify"), USE_GZIP(
+			"useGzip"), MAIL("mail");
 
 	private static Map<String, Option> map;
 
@@ -34,6 +29,8 @@ public enum Option {
 
 	public static Option getInstanse(String optionName) {
 
-		return (Option) map.get(optionName);
-	}	
+		Option option = (Option) map.get(optionName);
+		
+		return option;
+	}
 }

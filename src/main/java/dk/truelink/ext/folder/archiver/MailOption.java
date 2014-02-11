@@ -11,7 +11,6 @@ public enum MailOption {
 	PASSWORD("password"),
 	SENDTO("sendTo");
     
-    
     private static Map<String, MailOption> map;
 
 	static {

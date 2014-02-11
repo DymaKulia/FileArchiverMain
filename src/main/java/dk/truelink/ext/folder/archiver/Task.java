@@ -11,10 +11,7 @@ public class Task {
 	private String noSubFolderScan;
 	private String needCleanSource;
 
-	public String getSourceFolder() {
-		if (sourceFolder == null) {
-			return "";
-		}
+	public String getSourceFolder() {		
 		return sourceFolder;
 	}
 
@@ -22,10 +19,7 @@ public class Task {
 		this.sourceFolder = sourseFolder;
 	}
 
-	public String getTempFolder() {
-		if (tempFolder == null) {
-			return "";
-		}
+	public String getTempFolder() {		
 		return tempFolder;
 	}
 
@@ -33,10 +27,7 @@ public class Task {
 		this.tempFolder = tempFolder;
 	}
 
-	public String getDestFolder() {
-		if (destFolder == null) {
-			return "";
-		}
+	public String getDestFolder() {		
 		return destFolder;
 	}
 
@@ -44,10 +35,7 @@ public class Task {
 		this.destFolder = destFolder;
 	}
 
-	public String getAgeModify() {
-		if (ageModify == null) {
-			return "";
-		}
+	public String getAgeModify() {		
 		return ageModify;
 	}
 
@@ -55,10 +43,7 @@ public class Task {
 		this.ageModify = ageModify;
 	}
 
-	public String getGzip() {
-		if (gzip == null) {
-			return "false";
-		}
+	public String getGzip() {		
 		return gzip;
 	}
 
@@ -66,10 +51,7 @@ public class Task {
 		this.gzip = gzip;
 	}
 
-	public String getNoSubFolderScan() {
-		if (noSubFolderScan == null) {
-			return "false";
-		}
+	public String getNoSubFolderScan() {		
 		return noSubFolderScan;
 	}
 
@@ -77,10 +59,7 @@ public class Task {
 		this.noSubFolderScan = noSubFolderScan;
 	}
 
-	public String getNeedCleanSource() {
-		if (needCleanSource == null) {
-			return "false";
-		}
+	public String getNeedCleanSource() {		
 		return needCleanSource;
 	}
 
@@ -88,10 +67,7 @@ public class Task {
 		this.needCleanSource = needCleanSource;
 	}
 
-	public String getId() {
-		if (id == null) {
-			return "";
-		}
+	public String getId() {		
 		return id;
 	}
 

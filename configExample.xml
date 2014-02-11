@@ -23,7 +23,7 @@
 		<option name="destFolder">somePath</option>
 		<option name="tempFolder">somePath</option>
 		<option name="cleanSource">true</option>
-		<option name="subfolderScan">true</option>
+		<option name="noSubfolderScan">true</option>
 		<option name="daysAgoOfLastModify">1</option>
 		<option name="useGzip">true</option>
 	</task>

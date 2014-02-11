@@ -54,11 +54,11 @@ public class Helper {
 
 			if (nodeTask.getAttributes().getNamedItem("sourceFolder") == null) {
 				if (nodeTask.getAttributes().getNamedItem("id") == null) {
-					System.out.println(i + " in task order do not have mandatory sourceFolder attribute");
-					throw new RuntimeException();
+					String message = i + " in task order do not have mandatory sourceFolder attribute";
+					throw new RuntimeException(message);
 				} else {
-					System.out.println("Task with " + nodeTask.getAttributes().getNamedItem("id") + " do not have mandatory sourceFolder attribute");
-					throw new RuntimeException();
+					String message = "Task with " + nodeTask.getAttributes().getNamedItem("id") + " do not have mandatory sourceFolder attribute";
+					throw new RuntimeException(message);
 				}
 			} else {
 				task.setSourseFolder(nodeTask.getAttributes().getNamedItem("sourceFolder").getNodeValue());
@@ -75,29 +75,28 @@ public class Helper {
 
 			// Checking task after fill and if task is no filling full
 			// enter global configurations where it is need
-			if (task.getDestFolder().equals("")) {
+			if (task.getDestFolder() == null) {
 				task.setDestFolder(globalTask.getDestFolder());
 			}
-			if (task.getTempFolder().equals("")) {
+			if (task.getTempFolder() == null) {
 				task.setTempFolder(globalTask.getTempFolder());
 			}
-			if (task.getAgeModify().equals("")) {
+			if (task.getAgeModify() == null) {
 				task.setAgeModify(globalTask.getAgeModify());
 			}
-			if (task.getGzip().equals("")) {
+			if (task.getGzip() == null) {
 				task.setGzip(globalTask.getGzip());
 			}
-			if (task.getNeedCleanSource().equals("")) {
+			if (task.getNeedCleanSource() == null) {
 				task.setNeedCleanSource(globalTask.getNeedCleanSource());
 			}
-			if (task.getNoSubFolderScan().equals("")) {
+			if (task.getNoSubFolderScan() == null) {
 				task.setNoSubFolderScan(globalTask.getNoSubFolderScan());
 			}
 
 			if (configuration.contains(task)) {
-				System.out.println(i + " in task order has not unique id");
-				System.out.println("Task with id \"" + task.getId() + "\" already exists");
-				throw new RuntimeException();
+				String message = i + " in task order has not unique id. \n" + "Task with id \"" + task.getId() + "\" already exists";
+				throw new RuntimeException(message);
 			} else {
 				configuration.add(task);
 			}
@@ -112,29 +111,65 @@ public class Helper {
 
 			if (optionNode.getNodeName().equals("option")) {
 
-				switch (Option.getInstanse(optionNode.getAttributes().getNamedItem("name").getNodeValue())) {
+				String optionName = optionNode.getAttributes().getNamedItem("name").getNodeValue();
+				Option option = Option.getInstanse(optionName);
+
+				if (option == null) {
+					String message = "In task \'" + task.getId() + "\' option with name \'" + optionName + "\' is uncorrect";
+					throw new RuntimeException(message);
+				}
+
+				switch (option) {
 
 				case DEST_FOLDER:
+					if (task.getDestFolder() != null) {
+						String message = "Task \'" + task.getId() + "\' has two or more same options with name \'" + optionName;
+						throw new RuntimeException(message);
+					}
 					task.setDestFolder(optionNode.getTextContent());
 					break;
 
 				case TEMP_FOLDER:
+					if (task.getTempFolder() != null) {
+						String message = "Task \'" + task.getId() + "\' has two or more same options with name \'" + optionName;
+						throw new RuntimeException(message);
+					}
 					task.setTempFolder(optionNode.getTextContent());
 					break;
 
 				case CLEAN_SOURSE:
+					if (task.getNeedCleanSource() != null) {
+						String message = "Task \'" + task.getId() + "\' has two or more same options with name \'" + optionName;
+						throw new RuntimeException(message);
+					}					
+					checkValue(optionNode.getTextContent(), optionName, task);
 					task.setNeedCleanSource(optionNode.getTextContent());
 					break;
 
 				case NO_SUBFOLDER_SCAN:
+					if (task.getNoSubFolderScan() != null) {
+						String message = "Task \'" + task.getId() + "\' has two or more same options with name \'" + optionName;
+						throw new RuntimeException(message);
+					}
+					checkValue(optionNode.getTextContent(), optionName, task);
 					task.setNoSubFolderScan(optionNode.getTextContent());
 					break;
 
 				case DAYS_AGO_OF_LAST_MODIFY:
+					if (task.getAgeModify() != null) {
+						String message = "Task \'" + task.getId() + "\' has two or more same options with name \'" + optionName;
+						throw new RuntimeException(message);
+					}
+					//do check AgeModify ... !!!!!!!!
 					task.setAgeModify(optionNode.getTextContent());
 					break;
 
 				case USE_GZIP:
+					if (task.getGzip() != null) {
+						String message = "Task \'" + task.getId() + "\' has two or more same options with name \'" + optionName;
+						throw new RuntimeException(message);
+					}
+					checkValue(optionNode.getTextContent(), optionName, task);
 					task.setGzip(optionNode.getTextContent());
 					break;
 
@@ -171,6 +206,15 @@ public class Helper {
 					break;
 				}
 			}
+		}
+	}
+	
+	private static void checkValue(String value, String optionName, Task task){
+		if(!(value.equals("true")
+				| value.equals("false"))){
+			
+			String message = "Task \'" + task.getId() + "\' has value which differs from \'true\' or \'false\' in option with name \'" + optionName;
+			throw new RuntimeException(message);
 		}
 	}
 }
