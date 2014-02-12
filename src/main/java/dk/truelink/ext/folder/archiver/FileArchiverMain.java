@@ -34,21 +34,19 @@ public class FileArchiverMain {
 	private static String pathToConfigurationFile;
 
 	public static void main(String[] args) {
-		
+
 		if (args.length == 0) {
 			System.out.println("Unknown path to configuration file");
-			System.out.println("Use pattern: java -jar Archiver-0.0.1-all.jar <path to "
-					+ "configuration file> for execution mode");
-			System.out.println("Or use pattern: java -jar Archiver-0.0.1-all.jar <path to "
-					+ "configuration file> <check> for configuration checking mode");
+			System.out.println("Use pattern: java -jar Archiver-0.0.1-all.jar <path to " + "configuration file> for execution mode");
+			System.out.println("Or use pattern: java -jar Archiver-0.0.1-all.jar <path to " + "configuration file> <check> for configuration checking mode");
 			return;
 		} else if (args.length > 2) {
 			System.out.println("Too much input parameters");
 			return;
 		} else if (args.length == 2) {
-			
+
 			if (args[1].equals("check")) {
-				
+
 				// Do check of archiver configuration and print it
 				try {
 					Checker.checkAllArchiverConfiguration(args[0]);
@@ -57,9 +55,9 @@ public class FileArchiverMain {
 					if (mail == null) {
 						System.out.println("NO MAIL CONFIGURATIONS");
 					} else {
-						String[] mailNames = {"host","port","username","password","sendTo"};						
+						String[] mailNames = { "host", "port", "username", "password", "sendTo" };
 						for (int i = 0; i < mail.length; i++) {
-							System.out.println(mailNames[i]+": "+mail[i]);
+							System.out.println(mailNames[i] + ": " + mail[i]);
 						}
 					}
 					return;
@@ -77,13 +75,11 @@ public class FileArchiverMain {
 
 		File archiverConfigXml = new File(pathToConfigurationFile);
 		if (!archiverConfigXml.exists()) {
-			System.out
-					.println("Configuration file for archiver does not exist");
+			System.out.println("Configuration file for archiver does not exist");
 			return;
 		}
-		
-		ArrayList<Task> configuration = Helper
-				.readArchivationConfigs(archiverConfigXml);
+
+		ArrayList<Task> configuration = Helper.readArchivationConfigs(archiverConfigXml);
 
 		for (int i = 0; i < configuration.size(); i++) {
 
@@ -127,9 +123,9 @@ public class FileArchiverMain {
 			try {
 				System.out.println(inArgs.length + "inArgs.length");
 				for (int ii = 0; ii < inArgs.length; ii++) {
-					System.out.print(inArgs[ii]+" ");
+					System.out.print(inArgs[ii] + " ");
 				}
-				
+
 				mainArchiverMethod(inArgs);
 			} catch (Exception ex) {
 				System.out.println("Archive prosess with inner parameters ");
@@ -162,7 +158,7 @@ public class FileArchiverMain {
 		File sourceFolder = new File(source);
 		File destFolder = new File(dest);
 		File tempFolder = new File(temp);
-		Checker.checkTaskConfiguration(sourceFolder, destFolder, tempFolder, false);		
+		Checker.checkTaskConfiguration(sourceFolder, destFolder, tempFolder, false);
 
 		final File lockFile = new File(destFolder, LOCK_FILENAME);
 		lockFile.delete();
@@ -170,72 +166,48 @@ public class FileArchiverMain {
 		try {
 			final FileOutputStream out = new FileOutputStream(lockFile);
 			try {
-				java.nio.channels.FileLock lockFileLock = out.getChannel()
-						.tryLock();
+				java.nio.channels.FileLock lockFileLock = out.getChannel().tryLock();
 				try {
 					if (lockFileLock == null) {
-						System.out
-								.println("Program has been already started. Found lock file in destination folder '"
-										+ lockFile.getAbsolutePath() + "'");
+						System.out.println("Program has been already started. Found lock file in destination folder '" + lockFile.getAbsolutePath() + "'");
 						throw new RuntimeException("lockFileLock == null");
 					}
 
 					System.out.println("Program started with args:");
-					System.out.println("\tSource folder '" + source
-							+ "' (which folder to read)");
-					System.out.println("\tDest   folder '" + dest
-							+ "' (where to put archived files)");
-					System.out.println("\tTemp   folder '" + temp
-							+ "' (folder to use for temporary copied files)");
-					System.out
-							.println("\tForce  GZIP   '"
-									+ forceGZip
-									+ "' (at first ZIP into one file without deflation, than GZIP this file)");
-					System.out
-							.println("\tClean  source '"
-									+ cleanSource
-									+ "' (delete empty subfolders of source folder if all their files are moved into archive)");
-					System.out
-							.println("\tNo sub folder scan '"
-									+ noSubFolderScan
-									+ "' (work only with given folder, do not scan sub folders)");
+					System.out.println("\tSource folder '" + source + "' (which folder to read)");
+					System.out.println("\tDest   folder '" + dest + "' (where to put archived files)");
+					System.out.println("\tTemp   folder '" + temp + "' (folder to use for temporary copied files)");
+					System.out.println("\tForce  GZIP   '" + forceGZip + "' (at first ZIP into one file without deflation, than GZIP this file)");
+					System.out.println("\tClean  source '" + cleanSource + "' (delete empty subfolders of source folder if all their files are moved into archive)");
+					System.out.println("\tNo sub folder scan '" + noSubFolderScan + "' (work only with given folder, do not scan sub folders)");
 
 					long start = System.currentTimeMillis();
-					long count = process(sourceFolder, destFolder, tempFolder,
-							forceGZip, cleanSource, noSubFolderScan);
+					long count = process(sourceFolder, destFolder, tempFolder, forceGZip, cleanSource, noSubFolderScan);
 					long elapsed = System.currentTimeMillis() - start;
 
-					System.out.println("Done in " + (elapsed / 1000)
-							+ " seconds, generated archive has " + count
-							+ " files");
+					System.out.println("Done in " + (elapsed / 1000) + " seconds, generated archive has " + count + " files");
 
 				} finally {
 					lockFileLock.release();
 				}
 			} catch (IOException e) {
-				System.out.println("Try lock operation is fail on '"
-						+ lockFile.getAbsolutePath() + "'");
+				System.out.println("Try lock operation is fail on '" + lockFile.getAbsolutePath() + "'");
 				e.printStackTrace();
 			} finally {
 				out.close();
 			}
 		} catch (FileNotFoundException e) {
-			System.out.println("Could not find the file '"
-					+ lockFile.getAbsolutePath()
-					+ "' to create the FileInputStream");
+			System.out.println("Could not find the file '" + lockFile.getAbsolutePath() + "' to create the FileInputStream");
 			e.printStackTrace();
 		} catch (IOException e) {
-			System.out
-					.println("Could not create/close the FileInputStream for '"
-							+ lockFile.getAbsolutePath() + "' file");
+			System.out.println("Could not create/close the FileInputStream for '" + lockFile.getAbsolutePath() + "' file");
 			e.printStackTrace();
 		} finally {
 			lockFile.delete();
 		}
 	}
 
-	private static Set loadAdditionalParametersToSet(String[] args,
-			int startWith) {
+	private static Set loadAdditionalParametersToSet(String[] args, int startWith) {
 		Set extParams = new HashSet();
 		if (args != null) {
 			int i = startWith - 1;
@@ -258,9 +230,7 @@ public class FileArchiverMain {
 	 * @param noSubFolderScan
 	 * @return number of archived files.
 	 */
-	private static long process(File sourceFolder, File destFolder,
-			File tempFolder, boolean forceGZIP, boolean cleanSource,
-			boolean noSubFolderScan) {
+	private static long process(File sourceFolder, File destFolder, File tempFolder, boolean forceGZIP, boolean cleanSource, boolean noSubFolderScan) {
 
 		long count = 0;
 		long start = 0, elapsed = 0;
@@ -268,130 +238,91 @@ public class FileArchiverMain {
 			// 1. Looking for files in source folder and its sub folders and
 			// move them to temporary folder.
 			final Calendar searchStartTime = Calendar.getInstance();
-			final String tempSubFolderName = new SimpleDateFormat(
-					"yyyy.MM.dd_HH.mm.ss.SSS")
-					.format(searchStartTime.getTime());
+			final String tempSubFolderName = new SimpleDateFormat("yyyy.MM.dd_HH.mm.ss.SSS").format(searchStartTime.getTime());
 			File tempSubFolder = new File(tempFolder, tempSubFolderName);
 
 			System.out.println("Check available disk space");
 
-			checkAvailableDiskSpace(sourceFolder, tempFolder, noSubFolderScan,
-					destFolder);
+			checkAvailableDiskSpace(sourceFolder, tempFolder, noSubFolderScan, destFolder);
 
-			System.out.print("\t1.Moving files to temp sub folder '"
-					+ tempSubFolderName + "' ... ");
+			System.out.print("\t1.Moving files to temp sub folder '" + tempSubFolderName + "' ... ");
 			start = System.currentTimeMillis();
-			count = moveFilesToTemp(sourceFolder, sourceFolder, tempSubFolder,
-					cleanSource, noSubFolderScan);
+			count = moveFilesToTemp(sourceFolder, sourceFolder, tempSubFolder, cleanSource, noSubFolderScan);
 			elapsed = System.currentTimeMillis() - start;
-			System.out.println("Done in " + elapsed + "ms, moved " + count
-					+ " files.");
+			System.out.println("Done in " + elapsed + "ms, moved " + count + " files.");
 
 			if (count > 0) {
 				// 2. Make an archive
 				final Calendar archiveStartTime = Calendar.getInstance();
-				final String archiveName = new SimpleDateFormat(
-						"yyyy.MM.dd_HH.mm.ss.SSS").format(archiveStartTime
-						.getTime());
+				final String archiveName = new SimpleDateFormat("yyyy.MM.dd_HH.mm.ss.SSS").format(archiveStartTime.getTime());
 
-				System.out.print("\t2.Making an archive '" + archiveName
-						+ "' ... ");
+				System.out.print("\t2.Making an archive '" + archiveName + "' ... ");
 				File archiveFile = null;
 				start = System.currentTimeMillis();
 				if (forceGZIP) {
-					archiveFile = compactFolderWithGZIP(tempSubFolder,
-							archiveName);
+					archiveFile = compactFolderWithGZIP(tempSubFolder, archiveName);
 				} else {
 					archiveFile = compactFolder(tempSubFolder, archiveName);
 				}
 				elapsed = System.currentTimeMillis() - start;
-				System.out.println("Done in " + elapsed + "ms, size="
-						+ archiveFile.length() + "B, path = '"
-						+ archiveFile.getAbsolutePath() + "'");
+				System.out.println("Done in " + elapsed + "ms, size=" + archiveFile.length() + "B, path = '" + archiveFile.getAbsolutePath() + "'");
 
 				// 3. Delete temporary sub folder
-				System.out.print("\t3.Deleting temporary sub folder '"
-						+ tempSubFolder.getAbsolutePath() + "' ... ");
+				System.out.print("\t3.Deleting temporary sub folder '" + tempSubFolder.getAbsolutePath() + "' ... ");
 				start = System.currentTimeMillis();
 				long deletedFileCount = deleteFolder(tempSubFolder);
 				elapsed = System.currentTimeMillis() - start;
-				System.out.println("Done in " + elapsed + "ms, deleted "
-						+ deletedFileCount + " files.");
+				System.out.println("Done in " + elapsed + "ms, deleted " + deletedFileCount + " files.");
 
 				// 4. Move archive to destination folder using current date as
 				// sub folders
-				final String destSubFolderRelPath = buildDestSubFolderRelPath(archiveStartTime
-						.getTime());
-				final File destSubFolder = new File(destFolder,
-						destSubFolderRelPath);
+				final String destSubFolderRelPath = buildDestSubFolderRelPath(archiveStartTime.getTime());
+				final File destSubFolder = new File(destFolder, destSubFolderRelPath);
 
-				System.out
-						.print("\t4.Moving archive to destination sub folder '"
-								+ destSubFolder.getAbsolutePath() + "' ... ");
+				System.out.print("\t4.Moving archive to destination sub folder '" + destSubFolder.getAbsolutePath() + "' ... ");
 				start = System.currentTimeMillis();
 				moveFile(archiveFile, destSubFolder);
 				elapsed = System.currentTimeMillis() - start;
 				System.out.println("Done in " + elapsed + "ms");
 			}
 		} catch (Exception e) {
-			System.out.println("Cannot complete process: sourceFolder="
-					+ sourceFolder + "; destFolder=" + destFolder
-					+ "; tempFolder=" + tempFolder);
+			System.out.println("Cannot complete process: sourceFolder=" + sourceFolder + "; destFolder=" + destFolder + "; tempFolder=" + tempFolder);
 			e.printStackTrace();
 		}
 		return count;
 	}
 
-	private static void checkAvailableDiskSpace(File sourceFolder,
-			File tempFolder, boolean noSubFolderScan, File destFolder) {
+	private static void checkAvailableDiskSpace(File sourceFolder, File tempFolder, boolean noSubFolderScan, File destFolder) {
 
 		final File[] fileArray = sourceFolder.listFiles();
 		long sizeFiles = calculateSizeFiles(fileArray, noSubFolderScan);
 
 		if (sizeFiles + marginMemory >= tempFolder.getFreeSpace()) {
-			String message = "Available disk space with temp folder is not enough to move."
-					+ " The size of files that need moving is "
-					+ sizeFiles
-					+ " Bytes. Available disk space"
-					+ " with temp folder is "
-					+ tempFolder.getFreeSpace() + " Bytes";
-			try {
-				sendEmail(message);
-			} catch (Exception e) {
-				System.out.println("Cannot send Email");
-				System.out.println(e);
-			}
+			String message = "Available disk space with temp folder is not enough to move." + " The size of files that need moving is " + sizeFiles
+					+ " Bytes. Available disk space" + " with temp folder is " + tempFolder.getFreeSpace() + " Bytes";
+
+			sendEmail(message);
+
 			throw new RuntimeException("do not have enough temp folder disc memory");
 		}
 
 		if (sizeFiles + marginMemory >= destFolder.getFreeSpace()) {
-			String message = "Available disk space with dest folder is not enough to achivation."
-					+ " The size of files that need archivation is "
-					+ sizeFiles
-					+ " Bytes. Available disk space"
-					+ " with dest folder is "
-					+ destFolder.getFreeSpace()
-					+ " Bytes";
-			try {
-				sendEmail(message);
-			} catch (Exception e) {
-				System.out.println("Cannot send Email");
-				System.out.println(e);
-			}
-			throw new RuntimeException("do not have enough dest folder disc memory");
+			String message = "Available disk space with dest folder is not enough to achivation." + " The size of files that need archivation is " + sizeFiles
+					+ " Bytes. Available disk space" + " with dest folder is " + destFolder.getFreeSpace() + " Bytes";
+
+			sendEmail(message);
+			throw new RuntimeException("Do not have enough dest folder disc memory");
 		}
 	}
 
-	private static long calculateSizeFiles(File[] fileArray,
-			boolean noSubFolderScan) {
+	private static long calculateSizeFiles(File[] fileArray, boolean noSubFolderScan) {
 
 		long sizeFiles = 0;
 		for (int i = 0; i < fileArray.length; i++) {
 			if (fileArray[i].isDirectory()) {
 				if (!noSubFolderScan) {
 
-					sizeFiles += calculateSizeFiles(fileArray[i].listFiles(),
-							noSubFolderScan);
+					sizeFiles += calculateSizeFiles(fileArray[i].listFiles(), noSubFolderScan);
 				}
 			} else {
 				sizeFiles += fileArray[i].length();
@@ -410,15 +341,12 @@ public class FileArchiverMain {
 		return sb.toString();
 	}
 
-	private static long moveFilesToTemp(File sourceFolder,
-			File sourceSubFolder, File tempFolder, boolean cleanSource,
-			boolean noSubFolderScan) throws Exception {
+	private static long moveFilesToTemp(File sourceFolder, File sourceSubFolder, File tempFolder, boolean cleanSource, boolean noSubFolderScan) throws Exception {
 		long count = 0;
 
 		final File[] fileArray = sourceSubFolder.listFiles(fileFilter);
 
-		final String relSubFolderPath = sourceSubFolder.getAbsolutePath()
-				.substring(sourceFolder.getAbsolutePath().length());
+		final String relSubFolderPath = sourceSubFolder.getAbsolutePath().substring(sourceFolder.getAbsolutePath().length());
 
 		for (int i = 0; i < fileArray.length; i++) {
 			File currentFile = fileArray[i];
@@ -438,16 +366,12 @@ public class FileArchiverMain {
 			for (int i = 0; i < folderArray.length; i++) {
 				File currentFolder = folderArray[i];
 				try {
-					count += moveFilesToTemp(sourceFolder, currentFolder,
-							tempFolder, cleanSource, false);
+					count += moveFilesToTemp(sourceFolder, currentFolder, tempFolder, cleanSource, false);
 					if (cleanSource) {
-						File[] listFiles = currentFolder
-								.listFiles(filesOnlyFilter);
-						
+						File[] listFiles = currentFolder.listFiles(filesOnlyFilter);
+
 						if (listFiles == null || listFiles.length == 0) {
-							if (currentFolder != null
-									&& (!currentFolder.delete() || currentFolder
-											.exists())) {								
+							if (currentFolder != null && (!currentFolder.delete() || currentFolder.exists())) {
 								/*
 								 * IMPORTANT!
 								 * 
@@ -462,8 +386,7 @@ public class FileArchiverMain {
 						}
 					}
 				} catch (Exception e) {
-					System.out.println("Cannot process folder " + currentFolder
-							+ ":");
+					System.out.println("Cannot process folder " + currentFolder + ":");
 					e.printStackTrace();
 					throw e;
 				}
@@ -472,15 +395,12 @@ public class FileArchiverMain {
 		return count;
 	}
 
-	private static File moveFile(File currentFile, File destSubFolder)
-			throws Exception {
+	private static File moveFile(File currentFile, File destSubFolder) throws Exception {
 		final File newFile = new File(destSubFolder, currentFile.getName());
 
 		destSubFolder.mkdirs();
 		if (!destSubFolder.exists() || !destSubFolder.isDirectory()) {
-			throw new Exception("Cannot create folder "
-					+ destSubFolder.getAbsolutePath()
-					+ " or it is not a directory");
+			throw new Exception("Cannot create folder " + destSubFolder.getAbsolutePath() + " or it is not a directory");
 		}
 		currentFile.renameTo(newFile);
 		return newFile;
@@ -494,8 +414,7 @@ public class FileArchiverMain {
 				File file = listFiles[i];
 				if (file.isFile()) {
 					if (!file.delete() || file.exists()) {
-						throw new Exception("Cannot delete file "
-								+ file.getAbsolutePath());
+						throw new Exception("Cannot delete file " + file.getAbsolutePath());
 					}
 					count++;
 				} else {
@@ -504,22 +423,18 @@ public class FileArchiverMain {
 			}
 		}
 		if (!folder.delete() || folder.exists()) {
-			throw new Exception("Cannot delete folder "
-					+ folder.getAbsolutePath());
+			throw new Exception("Cannot delete folder " + folder.getAbsolutePath());
 		}
 		return count;
 	}
 
-	private static File compactFolder(File folder, String archiveName)
-			throws IOException {
+	private static File compactFolder(File folder, String archiveName) throws IOException {
 		return compactFolder(folder, archiveName, false);
 	}
 
-	private static File compactFolder(File folder, String archiveName,
-			boolean stored) throws IOException {
+	private static File compactFolder(File folder, String archiveName, boolean stored) throws IOException {
 		File archiveFile = new File(folder.getParent(), archiveName + ZIP);
-		ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(
-				archiveFile));
+		ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(archiveFile));
 		if (!stored) {
 			zos.setLevel(Deflater.BEST_COMPRESSION);
 			zos.setMethod(ZipOutputStream.DEFLATED);
@@ -531,16 +446,13 @@ public class FileArchiverMain {
 		return archiveFile;
 	}
 
-	private static File compactFolderWithGZIP(File folder, String archiveName)
-			throws IOException {
+	private static File compactFolderWithGZIP(File folder, String archiveName) throws IOException {
 		// Create STORED zip file
 		final File archiveFile = compactFolder(folder, archiveName, true);
 
 		// Create GZip
-		File archiveFileGZip = new File(archiveFile.getParent(), archiveName
-				+ ZIP + GZIP);
-		GZIPOutputStream gzip = new GZIPOutputStream(new FileOutputStream(
-				archiveFileGZip)) {
+		File archiveFileGZip = new File(archiveFile.getParent(), archiveName + ZIP + GZIP);
+		GZIPOutputStream gzip = new GZIPOutputStream(new FileOutputStream(archiveFileGZip)) {
 			{
 				def.setLevel(Deflater.BEST_COMPRESSION);
 			}
@@ -558,8 +470,7 @@ public class FileArchiverMain {
 	/**
 	 * Zip up a directory path
 	 */
-	public static void zipDir(File zipDir, ZipOutputStream zos, String path,
-			boolean stored) throws IOException {
+	public static void zipDir(File zipDir, ZipOutputStream zos, String path, boolean stored) throws IOException {
 		// get a listing of the directory content
 		String[] dirList = zipDir.list();
 		byte[] readBuffer = new byte[2156];
@@ -604,8 +515,7 @@ public class FileArchiverMain {
 		}
 	}
 
-	public static void gzipDir(File zipFile, GZIPOutputStream gzip)
-			throws IOException {
+	public static void gzipDir(File zipFile, GZIPOutputStream gzip) throws IOException {
 		byte[] readBuffer = new byte[2156];
 		int bytesIn = 0;
 		FileInputStream fis = new FileInputStream(zipFile);
@@ -637,8 +547,7 @@ public class FileArchiverMain {
 		}
 
 		public boolean accept(File file) {
-			return file.isFile()
-					&& file.lastModified() < this.c.getTimeInMillis();
+			return file.isFile() && file.lastModified() < this.c.getTimeInMillis();
 		}
 	}
 
@@ -667,17 +576,26 @@ public class FileArchiverMain {
 		// Mail notification module
 		String host, username, password, sendTo;
 		int port;
-		
-			String[] fromMailXml = Helper.readMailConfigs();
-			host = fromMailXml[0];
-			port = Integer.parseInt(fromMailXml[1]);
-			username = fromMailXml[2];
-			password = fromMailXml[3];
-			sendTo = fromMailXml[4];
 
-			EMailNotifier mailNotifier = new EMailNotifier(host, port,
-					username, password);
-			mailNotifier.sendMail(sendTo, "Logs archiver", message);		
+		String[] mailConfig = Helper.readMailConfigs();
+		host = mailConfig[0];
+		port = Integer.parseInt(mailConfig[1]);
+		username = mailConfig[2];
+		password = mailConfig[3];
+		sendTo = mailConfig[4];
+
+		EMailNotifier mailNotifier = new EMailNotifier(host, port, username, password);
+		try {
+			mailNotifier.sendMail(sendTo, "Logs archiver", message);
+		} catch (Exception e) {
+			System.out.println("Cannot send Email with next configuration:");
+			String[] mailNames = { "host", "port", "username", "password", "sendTo" };
+			for (int i = 0; i < mailConfig.length; i++) {
+				System.out.println(mailNames[i] + ": " + mailConfig[i]);
+			}
+			System.out.println(e);
+		}
+
 		//
 	}
 

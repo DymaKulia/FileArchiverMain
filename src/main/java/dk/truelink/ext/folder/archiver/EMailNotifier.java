@@ -43,7 +43,7 @@ public class EMailNotifier {
 			message.setText(sendingMessage);
 			Transport.send(message);
 		} catch (MessagingException mex) {
-			System.out.println("send failed, exception: " + mex);
+			System.err.println("send failed, exception: " + mex);
 		}
 	}
 }
