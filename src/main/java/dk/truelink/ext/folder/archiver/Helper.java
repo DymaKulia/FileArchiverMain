@@ -110,62 +110,66 @@ public class Helper {
 	private static void fillTask(Task task, NodeList options){
 		
 		for (int i = 0; i < options.getLength(); i++) {
-			Node option = options.item(i);
+			Node optionNode = options.item(i);
 			
-			if (option.getNodeName().equals("option")) {
+			if (optionNode.getNodeName().equals("option")) {				
+				
+				switch (Option.getInstanse(optionNode.getAttributes().getNamedItem("name")
+						.getNodeValue())) {
 
-				switch (option.getAttributes().getNamedItem("name")
-						.getNodeValue()) {
-
-				case "destFolder":
-					task.setDestFolder(option.getTextContent());
+				case DEST_FOLDER:
+					task.setDestFolder(optionNode.getTextContent());
 					break;
 
-				case "tempFolder":
-					task.setTempFolder(option.getTextContent());
+				case TEMP_FOLDER:
+					task.setTempFolder(optionNode.getTextContent());
 					break;
 
-				case "cleanSource":
-					task.setNeedCleanSource(option.getTextContent());
+				case CLEAN_SOURSE:
+					task.setNeedCleanSource(optionNode.getTextContent());
 					break;
 
-				case "noSubfolderScan":
-					task.setNoSubFolderScan(option.getTextContent());
+				case NO_SUBFOLDER_SCAN:
+					task.setNoSubFolderScan(optionNode.getTextContent());
 					break;
 
-				case "daysAgoOfLastModify":
-					task.setAgeModify(option.getTextContent());
+				case DAYS_AGO_OF_LAST_MODIFY:
+					task.setAgeModify(optionNode.getTextContent());
 					break;
 
-				case "useGzip":
-					task.setGzip(option.getTextContent());
+				case USE_GZIP:
+					task.setGzip(optionNode.getTextContent());
 					break;
 
-				case "mail":
-					NodeList mailNodes = option.getChildNodes();
+				case MAIL:
+					NodeList mailNodes = optionNode.getChildNodes();
 					mailConfigs = new String[5];
 					
 					for (int k = 0; k < mailNodes.getLength(); k++) {
 
 						Node mailConf = mailNodes.item(k);
-						
-						switch (mailConf.getNodeName()) {
 
-						case "host":
-							mailConfigs[0] = mailConf.getTextContent();
-							break;
-						case "port":
-							mailConfigs[1] = mailConf.getTextContent();
-							break;
-						case "username":
-							mailConfigs[2] = mailConf.getTextContent();
-							break;
-						case "password":
-							mailConfigs[3] = mailConf.getTextContent();
-							break;
-						case "sendTo":
-							mailConfigs[4] = mailConf.getTextContent();
-							break;
+						if (!mailConf.getNodeName().equals("#text")) {
+							
+							switch (MailOption.getInstanse(mailConf
+									.getNodeName())) {
+
+							case HOST:
+								mailConfigs[0] = mailConf.getTextContent();
+								break;
+							case PORT:
+								mailConfigs[1] = mailConf.getTextContent();
+								break;
+							case USERNAME:
+								mailConfigs[2] = mailConf.getTextContent();
+								break;
+							case PASSWORD:
+								mailConfigs[3] = mailConf.getTextContent();
+								break;
+							case SENDTO:
+								mailConfigs[4] = mailConf.getTextContent();
+								break;
+							}
 						}
 					}
 					break;

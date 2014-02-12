@@ -64,7 +64,8 @@ public class FileArchiverMain {
 					}
 					return;
 				} catch (Exception ex) {
-					System.out.println("Cheking is aborted");					
+					System.out.println("Cheking is aborted");
+					ex.printStackTrace();
 					return;
 				}
 			} else {
