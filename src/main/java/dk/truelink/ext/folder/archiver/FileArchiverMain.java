@@ -79,7 +79,14 @@ public class FileArchiverMain {
 			return;
 		}
 
-		ArrayList<Task> configuration = Helper.readArchivationConfigs(archiverConfigXml);
+		ArrayList<Task> configuration = null;
+		try {
+			configuration = Helper.readArchivationConfigs(archiverConfigXml);
+		} catch (Exception ex) {
+			System.out.println("Archive prosess is aborted");
+			ex.printStackTrace();
+			return;
+		}
 
 		for (int i = 0; i < configuration.size(); i++) {
 
@@ -89,13 +96,13 @@ public class FileArchiverMain {
 			Task task = configuration.get(i);
 			int countInArgs = 3;
 
-			if (task.getGzip().equals("true")) {
+			if (task.getGzip() != null && task.getGzip().equals("true")) {
 				countInArgs++;
 			}
-			if (task.getNoSubFolderScan().equals("true")) {
+			if (task.getNoSubFolderScan() != null && task.getNoSubFolderScan().equals("true")) {
 				countInArgs++;
 			}
-			if (task.getNeedCleanSource().equals("true")) {
+			if (task.getNeedCleanSource() != null && task.getNeedCleanSource().equals("true")) {
 				countInArgs++;
 			}
 
@@ -121,33 +128,31 @@ public class FileArchiverMain {
 
 			ageModify = Integer.parseInt(task.getAgeModify()) * -1;
 			try {
-				System.out.println(inArgs.length + "inArgs.length");
-				for (int ii = 0; ii < inArgs.length; ii++) {
-					System.out.print(inArgs[ii] + " ");
-				}
-
 				mainArchiverMethod(inArgs);
 			} catch (Exception ex) {
-				System.out.println("Archive prosess with inner parameters ");
+				System.out.println("Archive prosess with input parameters ");
 				for (int k = 0; k < inArgs.length; k++) {
 					System.out.print(inArgs[k] + " ");
 				}
 				System.out.println("is aborted");
-				System.out.println(ex);
+				ex.printStackTrace();
 			}
 		}
 	}
 
 	public static void mainArchiverMethod(String[] args) {
 
-		if (args.length < 3) {
-			System.out
-					.println("Utility to archive contents of some folder, grouped by last change date. If folder contains subfolders, files in these subfolders will also be archived keeping relative path.");
-			throw new RuntimeException("args.length < 3");
-		}
 		String source = args[0];
 		String dest = args[1];
 		String temp = args[2];
+
+		if (source == null) {
+			throw new RuntimeException("Source folder is NULL");
+		} else if (dest == null) {
+			throw new RuntimeException("Dest folder is NULL");
+		} else if (temp == null) {
+			throw new RuntimeException("Temp folder is NULL");
+		}
 
 		final Set extParams = loadAdditionalParametersToSet(args, 3);
 
@@ -169,10 +174,9 @@ public class FileArchiverMain {
 				java.nio.channels.FileLock lockFileLock = out.getChannel().tryLock();
 				try {
 					if (lockFileLock == null) {
-						System.out.println("Program has been already started. Found lock file in destination folder '" + lockFile.getAbsolutePath() + "'");
-						throw new RuntimeException("lockFileLock == null");
+						throw new RuntimeException("Program has been already started. Found lock file in destination folder '" + lockFile.getAbsolutePath() + "'");
 					}
-
+					System.out.println("-----------------------------------------------------------");
 					System.out.println("Program started with args:");
 					System.out.println("\tSource folder '" + source + "' (which folder to read)");
 					System.out.println("\tDest   folder '" + dest + "' (where to put archived files)");
@@ -356,7 +360,6 @@ public class FileArchiverMain {
 				count++;
 			} catch (Exception e) {
 				System.out.println("Cannot process file " + currentFile + ":");
-				e.printStackTrace();
 				throw e;
 			}
 		}
@@ -387,7 +390,6 @@ public class FileArchiverMain {
 					}
 				} catch (Exception e) {
 					System.out.println("Cannot process folder " + currentFolder + ":");
-					e.printStackTrace();
 					throw e;
 				}
 			}
@@ -399,7 +401,7 @@ public class FileArchiverMain {
 		final File newFile = new File(destSubFolder, currentFile.getName());
 
 		destSubFolder.mkdirs();
-		if (!destSubFolder.exists() || !destSubFolder.isDirectory()) {
+		if (!(destSubFolder.exists() & destSubFolder.isDirectory())) {
 			throw new Exception("Cannot create folder " + destSubFolder.getAbsolutePath() + " or it is not a directory");
 		}
 		currentFile.renameTo(newFile);

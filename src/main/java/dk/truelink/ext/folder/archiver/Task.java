@@ -11,7 +11,7 @@ public class Task {
 	private String noSubFolderScan;
 	private String needCleanSource;
 
-	public String getSourceFolder() {		
+	public String getSourceFolder() {
 		return sourceFolder;
 	}
 
@@ -19,7 +19,7 @@ public class Task {
 		this.sourceFolder = sourseFolder;
 	}
 
-	public String getTempFolder() {		
+	public String getTempFolder() {
 		return tempFolder;
 	}
 
@@ -27,7 +27,7 @@ public class Task {
 		this.tempFolder = tempFolder;
 	}
 
-	public String getDestFolder() {		
+	public String getDestFolder() {
 		return destFolder;
 	}
 
@@ -35,7 +35,7 @@ public class Task {
 		this.destFolder = destFolder;
 	}
 
-	public String getAgeModify() {		
+	public String getAgeModify() {
 		return ageModify;
 	}
 
@@ -43,11 +43,13 @@ public class Task {
 		this.ageModify = ageModify;
 	}
 
-	public String getGzip() {		
+	public String getGzip() {
+		
 		return gzip;
 	}
 
 	public void setGzip(String gzip) {
+
 		this.gzip = gzip;
 	}
 
@@ -67,7 +69,7 @@ public class Task {
 		this.needCleanSource = needCleanSource;
 	}
 
-	public String getId() {		
+	public String getId() {
 		return id;
 	}
 

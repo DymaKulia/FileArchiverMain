@@ -39,6 +39,7 @@ public class Helper {
 
 		// Read global configurations
 		Task globalTask = new Task();
+		globalTask.setId("GLOBAL");
 		NodeList globals = doc.getElementsByTagName("global");
 		Node global = globals.item(0);
 		NodeList globalOptions = global.getChildNodes();
@@ -160,7 +161,15 @@ public class Helper {
 						String message = "Task \'" + task.getId() + "\' has two or more same options with name \'" + optionName;
 						throw new RuntimeException(message);
 					}
-					//do check AgeModify ... !!!!!!!!
+					String age = null;
+					try {
+						age = optionNode.getTextContent();
+						int integer = Integer.parseInt(age);
+					} catch (Exception e) {
+						String message = "Task \'" + task.getId() + "\' has uncorrect value \'"+ age +"\' of option with name \'" + optionName;
+						throw new RuntimeException(message);
+					}
+
 					task.setAgeModify(optionNode.getTextContent());
 					break;
 
