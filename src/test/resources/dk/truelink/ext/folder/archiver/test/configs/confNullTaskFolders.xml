@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<global>		
+	</global>
+	
+	<!-- Task attribute sourceFolder is mandatory. If attribute id is absent 
+		then the program will automatically add it with source folder name. If some 
+		options are absent then the program will automatically use the global options -->	
+	
+	<task sourceFolder="someFolder"/>
+	
+</configuration>

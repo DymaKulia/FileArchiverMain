@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.ArrayList;
 
 public class Checker {
+	
+	private static int countWarnings;
 
 	public static void checkAllArchiverConfiguration(String pathToConfigurationFile) {
 
@@ -13,7 +15,10 @@ public class Checker {
 
 		File archiverConfigXml = new File(pathToConfigurationFile);
 		if (!archiverConfigXml.exists()) {
+			System.out.println("Cheking is aborted");
 			System.out.println("Configuration file: " + pathToConfigurationFile + " for archiver does not exist");
+			String message = "Configuration file for archiver does not exist";
+			throw new RuntimeException(message);
 		} else {
 
 			ArrayList<Task> configuration = Helper.readArchivationConfigs(archiverConfigXml);
@@ -31,7 +36,7 @@ public class Checker {
 				System.out.println("daysAgoOfLastModify: " + configuration.get(i).getAgeModify());
 				System.out.println("useGzip: " + configuration.get(i).getGzip());
 
-				int countWarnings = 0;
+				countWarnings = 0;
 				File sourceFolder = null;
 				if (configuration.get(i).getSourceFolder() != null) {
 					sourceFolder = new File(configuration.get(i).getSourceFolder());
@@ -134,6 +139,10 @@ public class Checker {
 				throw new RuntimeException();
 			}
 		}
+		return countWarnings;
+	}
+
+	public static int getCountWarnings() {
 		return countWarnings;
 	}
 }

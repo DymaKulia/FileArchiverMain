@@ -28,11 +28,11 @@ public class Helper {
 		try {
 			doc = builder.parse(new FileInputStream(configArchiverXml));
 		} catch (FileNotFoundException e1) {
-			new RuntimeException(e1);
+			throw new RuntimeException(e1);
 		} catch (SAXException e1) {
-			new RuntimeException(e1);
+			throw new RuntimeException(e1);
 		} catch (IOException e1) {
-			new RuntimeException(e1);
+			throw new RuntimeException(e1);
 		}
 
 		ArrayList<Task> configuration = new ArrayList<Task>();
@@ -42,9 +42,12 @@ public class Helper {
 		globalTask.setId("GLOBAL");
 		NodeList globals = doc.getElementsByTagName("global");
 		Node global = globals.item(0);
-		NodeList globalOptions = global.getChildNodes();
-		fillTask(globalTask, globalOptions);
-
+		
+		if (global != null) {
+			NodeList globalOptions = global.getChildNodes();
+			fillTask(globalTask, globalOptions);
+		}
+		
 		// Read each task configurations
 		NodeList allTasks = doc.getElementsByTagName("task");
 
@@ -142,7 +145,7 @@ public class Helper {
 					if (task.getNeedCleanSource() != null) {
 						String message = "Task \'" + task.getId() + "\' has two or more same options with name \'" + optionName;
 						throw new RuntimeException(message);
-					}					
+					}
 					checkValue(optionNode.getTextContent(), optionName, task);
 					task.setNeedCleanSource(optionNode.getTextContent());
 					break;
@@ -166,7 +169,7 @@ public class Helper {
 						age = optionNode.getTextContent();
 						int integer = Integer.parseInt(age);
 					} catch (Exception e) {
-						String message = "Task \'" + task.getId() + "\' has uncorrect value \'"+ age +"\' of option with name \'" + optionName;
+						String message = "Task \'" + task.getId() + "\' has uncorrect value \'" + age + "\' of option with name \'" + optionName;
 						throw new RuntimeException(message);
 					}
 
@@ -217,11 +220,10 @@ public class Helper {
 			}
 		}
 	}
-	
-	private static void checkValue(String value, String optionName, Task task){
-		if(!(value.equals("true")
-				| value.equals("false"))){
-			
+
+	private static void checkValue(String value, String optionName, Task task) {
+		if (!(value.equals("true") | value.equals("false"))) {
+
 			String message = "Task \'" + task.getId() + "\' has value which differs from \'true\' or \'false\' in option with name \'" + optionName;
 			throw new RuntimeException(message);
 		}
