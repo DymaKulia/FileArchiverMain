@@ -78,16 +78,14 @@ public class Checker {
 	}
 
 	public static int checkTaskConfiguration(File sourceFolder, File destFolder, File tempFolder, boolean checkerMode) {
-
-		int countWarnings = 0;
-
+		
 		if (!(sourceFolder.exists() & sourceFolder.isDirectory())) {
 			System.out.println("");
 			System.out.println("WARNING: source folder " + sourceFolder.getPath() + " does not exist or is not a directory");
 
 			countWarnings++;
 			if (!checkerMode) {
-				throw new RuntimeException();
+				throw new RuntimeException("Error");
 			}
 		}
 		if (!(destFolder.exists() & destFolder.isDirectory())) {
@@ -96,7 +94,7 @@ public class Checker {
 
 			countWarnings++;
 			if (!checkerMode) {
-				throw new RuntimeException();
+				throw new RuntimeException("Error");
 			}
 		}
 		if (!(tempFolder.exists() & tempFolder.isDirectory())) {
@@ -105,7 +103,7 @@ public class Checker {
 
 			countWarnings++;
 			if (!checkerMode) {
-				throw new RuntimeException();
+				throw new RuntimeException("Error");
 			}
 		}
 
@@ -116,7 +114,7 @@ public class Checker {
 
 			countWarnings++;
 			if (!checkerMode) {
-				throw new RuntimeException();
+				throw new RuntimeException("Error");
 			}
 		}
 
@@ -126,7 +124,7 @@ public class Checker {
 
 			countWarnings++;
 			if (!checkerMode) {
-				throw new RuntimeException();
+				throw new RuntimeException("Error");
 			}
 		}
 
@@ -136,7 +134,7 @@ public class Checker {
 
 			countWarnings++;
 			if (!checkerMode) {
-				throw new RuntimeException();
+				throw new RuntimeException("Error");
 			}
 		}
 		return countWarnings;

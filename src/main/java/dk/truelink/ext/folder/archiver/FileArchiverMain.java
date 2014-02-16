@@ -120,7 +120,7 @@ public class FileArchiverMain {
 		}
 	}
 
-	private static ArrayList<Task> readConfigurationFromFile(String path) {
+	public static ArrayList<Task> readConfigurationFromFile(String path) {
 
 		File archiverConfig = new File(path);
 		if (!archiverConfig.exists()) {			
@@ -130,10 +130,9 @@ public class FileArchiverMain {
 		ArrayList<Task> configuration = null;
 		try {
 			configuration = Helper.readArchivationConfigs(archiverConfig);
-		} catch (Exception ex) {
-			System.out.println("Archive prosess is aborted");
-			ex.printStackTrace();
-			return null;
+		} catch (RuntimeException ex) {
+			System.out.println("Archive prosess is aborted");			
+			throw ex;
 		}
 		return configuration;
 	}
@@ -317,6 +316,11 @@ public class FileArchiverMain {
 				System.out.println("Done in " + elapsed + "ms");
 
 				// 5. Delete all files that already archived
+				
+				//for testing
+				Thread.sleep(500);				
+				//
+				
 				System.out.print("\t5.Delete files in source folder '" + sourceFolder.getAbsolutePath() + "' ... ");
 				start = System.currentTimeMillis();
 				count = copyFilesToTempOrDelete(sourceFolder, sourceFolder, tempSubFolder, cleanSource, noSubFolderScan, DELETE);
@@ -410,7 +414,7 @@ public class FileArchiverMain {
 				}
 				if (command.equals(DELETE)) {
 					if (!currentFile.delete()) {
-						throw new Exception("Can't delete");
+						throw new Exception("Can't delete " + currentFile.getPath());
 					}
 					count++;
 				}

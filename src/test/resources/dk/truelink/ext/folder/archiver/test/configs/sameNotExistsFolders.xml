@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<global>
+		<option name="destFolder">somePath</option>
+		<option name="tempFolder">somePath</option>
+		<option name="cleanSource">true</option>
+		<option name="noSubfolderScan">true</option>
+		<option name="daysAgoOfLastModify">1</option>
+		<option name="useGzip">true</option>
+		<option name="mail">
+			<host>smtp.gmail.com</host>
+			<port>587</port>
+			<username></username>
+			<password></password>
+			<sendTo>e@mail.ru</sendTo>
+		</option>
+	</global>
+
+	<!-- Task attribute sourceFolder is mandatory. If attribute id is absent 
+		then the program will automatically add it with source folder name. If some 
+		options are absent then the program will automatically use the global options -->
+
+	<task sourceFolder="somePath" />
+
+</configuration>
