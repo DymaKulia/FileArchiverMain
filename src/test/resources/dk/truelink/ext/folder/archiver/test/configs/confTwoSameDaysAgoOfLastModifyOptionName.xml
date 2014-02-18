@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<task id="someId1" sourceFolder="somePath">
+		<option name="daysAgoOfLastModify">1</option>
+		<option name="daysAgoOfLastModify">1</option>
+	</task>
+</configuration>

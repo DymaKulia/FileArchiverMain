@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<global>		
+		<option name="mail">
+			<host>smtp.gmail.com</host>
+			<porte>587</porte>
+			<username></username>
+			<password></password>
+			<sendTo>e@mail.ru</sendTo>
+		</option>
+	</global>
+</configuration>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<global>		
+	</global>
+
+	<task id="someId1" sourceFolder="somePath">		
+	</task>
+	
+	<task id="someId1" sourceFolder="somePath">			
+	</task>
+	
+</configuration>

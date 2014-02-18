@@ -1,0 +1,12 @@
+<configuration>
+	<global>
+	    <option name="destFolde">dest</option>		
+	</global>
+
+	<task id="someId1" sourceFolder="somePath">		
+	</task>
+	
+	<task id="someId1" sourceFolder="somePath">			
+	</task>
+	
+</configuration>

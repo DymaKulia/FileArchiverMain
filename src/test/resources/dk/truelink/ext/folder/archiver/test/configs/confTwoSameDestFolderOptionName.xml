@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>	
+	<task id="someId1" sourceFolder="somePath">
+		<option name="destFolder">someDestPath</option>
+		<option name="destFolder">someDestPath</option>	
+	</task>
+</configuration>

@@ -42,12 +42,12 @@ public class Helper {
 		globalTask.setId("GLOBAL");
 		NodeList globals = doc.getElementsByTagName("global");
 		Node global = globals.item(0);
-		
+
 		if (global != null) {
 			NodeList globalOptions = global.getChildNodes();
 			fillTask(globalTask, globalOptions);
 		}
-		
+
 		// Read each task configurations
 		NodeList allTasks = doc.getElementsByTagName("task");
 
@@ -127,7 +127,7 @@ public class Helper {
 
 				case DEST_FOLDER:
 					if (task.getDestFolder() != null) {
-						String message = "Task \'" + task.getId() + "\' has two or more same options with name \'" + optionName;
+						String message = "Task \'" + task.getId() + "\' has two or more same options with name " + optionName;
 						throw new RuntimeException(message);
 					}
 					task.setDestFolder(optionNode.getTextContent());
@@ -135,7 +135,7 @@ public class Helper {
 
 				case TEMP_FOLDER:
 					if (task.getTempFolder() != null) {
-						String message = "Task \'" + task.getId() + "\' has two or more same options with name \'" + optionName;
+						String message = "Task \'" + task.getId() + "\' has two or more same options with name " + optionName;
 						throw new RuntimeException(message);
 					}
 					task.setTempFolder(optionNode.getTextContent());
@@ -143,7 +143,7 @@ public class Helper {
 
 				case CLEAN_SOURSE:
 					if (task.getNeedCleanSource() != null) {
-						String message = "Task \'" + task.getId() + "\' has two or more same options with name \'" + optionName;
+						String message = "Task \'" + task.getId() + "\' has two or more same options with name " + optionName;
 						throw new RuntimeException(message);
 					}
 					checkValue(optionNode.getTextContent(), optionName, task);
@@ -152,7 +152,7 @@ public class Helper {
 
 				case NO_SUBFOLDER_SCAN:
 					if (task.getNoSubFolderScan() != null) {
-						String message = "Task \'" + task.getId() + "\' has two or more same options with name \'" + optionName;
+						String message = "Task \'" + task.getId() + "\' has two or more same options with name " + optionName;
 						throw new RuntimeException(message);
 					}
 					checkValue(optionNode.getTextContent(), optionName, task);
@@ -161,7 +161,7 @@ public class Helper {
 
 				case DAYS_AGO_OF_LAST_MODIFY:
 					if (task.getAgeModify() != null) {
-						String message = "Task \'" + task.getId() + "\' has two or more same options with name \'" + optionName;
+						String message = "Task \'" + task.getId() + "\' has two or more same options with name " + optionName;
 						throw new RuntimeException(message);
 					}
 					String age = null;
@@ -169,7 +169,7 @@ public class Helper {
 						age = optionNode.getTextContent();
 						int integer = Integer.parseInt(age);
 					} catch (Exception e) {
-						String message = "Task \'" + task.getId() + "\' has uncorrect value \'" + age + "\' of option with name \'" + optionName;
+						String message = "Task \'" + task.getId() + "\' has uncorrect value \'" + age + "\' of option with name " + optionName;
 						throw new RuntimeException(message);
 					}
 
@@ -178,7 +178,7 @@ public class Helper {
 
 				case USE_GZIP:
 					if (task.getGzip() != null) {
-						String message = "Task \'" + task.getId() + "\' has two or more same options with name \'" + optionName;
+						String message = "Task \'" + task.getId() + "\' has two or more same options with name " + optionName;
 						throw new RuntimeException(message);
 					}
 					checkValue(optionNode.getTextContent(), optionName, task);
@@ -195,7 +195,14 @@ public class Helper {
 
 						if (!mailConf.getNodeName().equals("#text")) {
 
-							switch (MailOption.getInstanse(mailConf.getNodeName())) {
+							MailOption mailOption = MailOption.getInstanse(mailConf.getNodeName());
+
+							if (mailOption == null) {
+								String message = "Option name "+mailConf.getNodeName()+" is uncorrect";
+								throw new RuntimeException(message);
+							}
+							
+							switch (mailOption) {
 
 							case HOST:
 								mailConfigs[0] = mailConf.getTextContent();
@@ -220,11 +227,38 @@ public class Helper {
 			}
 		}
 	}
+	
+	public static void sendEmail(String message) {
+		/** Mail notification module */
+		String host, username, password, sendTo;
+		int port;
+
+		if (mailConfigs != null) {
+
+			host = mailConfigs[0];
+			port = Integer.parseInt(mailConfigs[1]);
+			username = mailConfigs[2];
+			password = mailConfigs[3];
+			sendTo = mailConfigs[4];
+
+			EMailNotifier mailNotifier = new EMailNotifier(host, port, username, password);
+			try {
+				mailNotifier.sendMail(sendTo, "Logs archiver", message);
+			} catch (Exception e) {
+				System.out.println("Cannot send Email with next configuration:");
+				String[] mailNames = { "host", "port", "username", "password", "sendTo" };
+				for (int i = 0; i < mailConfigs.length; i++) {
+					System.out.println(mailNames[i] + ": " + mailConfigs[i]);
+				}
+				System.out.println(e);
+			}
+		}
+	}
 
 	private static void checkValue(String value, String optionName, Task task) {
 		if (!(value.equals("true") | value.equals("false"))) {
 
-			String message = "Task \'" + task.getId() + "\' has value which differs from \'true\' or \'false\' in option with name \'" + optionName;
+			String message = "Task \'" + task.getId() + "\' has value which differs from \'true\' or \'false\' in option with name " + optionName;
 			throw new RuntimeException(message);
 		}
 	}

@@ -35,22 +35,24 @@ public class FileArchiverMain {
 	private static final String DELETE = "delete";
 	private static final long marginMemory = 100000000;
 
+	private static long copiedCount;
+	private static long deletedCount;
 	private static AgeFileFilter fileFilter;
-	private static int ageModify;	
+	private static int ageModify;
 
 	public static void main(String[] args) {
 
 		if (args.length == 0) {
-			String message = "Unknown path to configuration file";			
+			String message = "Unknown path to configuration file";
 			System.out.println("Use pattern: java -jar Archiver-0.0.1-all.jar <path to " + "configuration file> for execution mode");
 			System.out.println("Or use pattern: java -jar Archiver-0.0.1-all.jar <path to " + "configuration file> <check> for configuration checking mode");
 			throw new RuntimeException(message);
 		} else if (args.length > 2) {
-			String message = "Too much input parameters for archiver";			
+			String message = "Too much input parameters for archiver";
 			throw new RuntimeException(message);
 		} else if (args.length == 2) {
 
-			// Do check of archiver configuration and print it
+			/** Do check of archiver configuration and print it */
 			checkArchiverConfiguration(args);
 
 		} else if (args.length == 1) {
@@ -66,7 +68,7 @@ public class FileArchiverMain {
 
 			for (int i = 0; i < configuration.size(); i++) {
 
-				// Create inArgs from configuration items and set ageModify
+				/** Create inArgs from configuration items and set ageModify */
 
 				Task task = configuration.get(i);
 				int countInArgs = 3;
@@ -103,9 +105,6 @@ public class FileArchiverMain {
 
 				ageModify = Integer.parseInt(task.getAgeModify()) * -1;
 				try {
-					//Before start to do each task create new filter to filtrate 
-					//files to archive. It needs because before one task will be finished
-					//the date can changed so for new date we need new filter.
 					fileFilter = new AgeFileFilter();
 					doArchiveTask(inArgs);
 				} catch (Exception ex) {
@@ -123,7 +122,7 @@ public class FileArchiverMain {
 	public static ArrayList<Task> readConfigurationFromFile(String path) {
 
 		File archiverConfig = new File(path);
-		if (!archiverConfig.exists()) {			
+		if (!archiverConfig.exists()) {
 			throw new RuntimeException("Configuration file for archiver does not exist");
 		}
 
@@ -131,7 +130,7 @@ public class FileArchiverMain {
 		try {
 			configuration = Helper.readArchivationConfigs(archiverConfig);
 		} catch (RuntimeException ex) {
-			System.out.println("Archive prosess is aborted");			
+			System.out.println("Archive prosess is aborted");
 			throw ex;
 		}
 		return configuration;
@@ -141,21 +140,21 @@ public class FileArchiverMain {
 
 		if (args[1].equals(CHECK_MODE)) {
 
-			// Do check of archiver configuration and print it
-			
-				Checker.checkAllArchiverConfiguration(args[0]);
-				String[] mail = Helper.readMailConfigs();
-				System.out.println("-----mail cofiguration-------");
-				if (mail == null) {
-					System.out.println("NO MAIL CONFIGURATIONS");
-				} else {
-					String[] mailNames = { "host", "port", "username", "password", "sendTo" };
-					for (int i = 0; i < mail.length; i++) {
-						System.out.println(mailNames[i] + ": " + mail[i]);
-					}
+			/** Do check of archiver configuration and print it */
+
+			Checker.checkAllArchiverConfiguration(args[0]);
+			String[] mail = Helper.readMailConfigs();
+			System.out.println("-----mail cofiguration-------");
+			if (mail == null) {
+				System.out.println("NO MAIL CONFIGURATIONS");
+			} else {
+				String[] mailNames = { "host", "port", "username", "password", "sendTo" };
+				for (int i = 0; i < mail.length; i++) {
+					System.out.println(mailNames[i] + ": " + mail[i]);
 				}
-			
-		} else {			
+			}
+
+		} else {
 			throw new RuntimeException("Unknown parameter " + args[1]);
 		}
 
@@ -258,14 +257,18 @@ public class FileArchiverMain {
 	 */
 	private static long process(File sourceFolder, File destFolder, File tempFolder, boolean forceGZIP, boolean cleanSource, boolean noSubFolderScan) {
 
-		long count = 0;
+		copiedCount = 0;
+		deletedCount = 0;
+
 		long start = 0, elapsed = 0;
 
 		File tempSubFolder = null;
 		try {
 
-			// 1. Looking for files in source folder and its sub folders and
-			// copy them to temporary folder.
+			/**
+			 * 1. Looking for files in source folder and its sub folders and
+			 * copy them to temporary folder.
+			 */
 			final Calendar searchStartTime = Calendar.getInstance();
 			final String tempSubFolderName = new SimpleDateFormat("yyyy.MM.dd_HH.mm.ss.SSS").format(searchStartTime.getTime());
 			tempSubFolder = new File(tempFolder, tempSubFolderName);
@@ -277,13 +280,13 @@ public class FileArchiverMain {
 			System.out.print("\t1.Copy files to temp sub folder '" + tempSubFolderName + "' ... ");
 
 			start = System.currentTimeMillis();
-			count = copyFilesToTempOrDelete(sourceFolder, sourceFolder, tempSubFolder, cleanSource, noSubFolderScan, COPY);
+			copiedCount = copyFilesToTempOrDelete(sourceFolder, sourceFolder, tempSubFolder, cleanSource, noSubFolderScan, COPY);
 			elapsed = System.currentTimeMillis() - start;
-			System.out.println("Done in " + elapsed + "ms, moved " + count + " files.");
+			System.out.println("Done in " + elapsed + "ms, moved " + copiedCount + " files.");
 
-			if (count > 0) {
+			if (copiedCount > 0) {
 
-				// 2. Make an archive
+				/** 2. Make an archive */
 				final String archiveName = new SimpleDateFormat("yyyy.MM.dd_HH.mm.ss.SSS").format(searchStartTime.getTime());
 
 				System.out.print("\t2.Making an archive '" + archiveName + "' ... ");
@@ -297,15 +300,17 @@ public class FileArchiverMain {
 				elapsed = System.currentTimeMillis() - start;
 				System.out.println("Done in " + elapsed + "ms, size=" + archiveFile.length() + "B, path = '" + archiveFile.getAbsolutePath() + "'");
 
-				// 3. Delete temporary sub folder
+				/** 3. Delete temporary sub folder */
 				System.out.print("\t3.Deleting temporary sub folder '" + tempSubFolder.getAbsolutePath() + "' ... ");
 				start = System.currentTimeMillis();
 				long deletedFileCount = deleteFolder(tempSubFolder);
 				elapsed = System.currentTimeMillis() - start;
 				System.out.println("Done in " + elapsed + "ms, deleted " + deletedFileCount + " files.");
 
-				// 4. Move archive to destination folder using current date as
-				// sub folders
+				/**
+				 * 4. Move archive to destination folder using current date as
+				 * sub folders
+				 */
 				final String destSubFolderRelPath = buildDestSubFolderRelPath(searchStartTime.getTime());
 				final File destSubFolder = new File(destFolder, destSubFolderRelPath);
 
@@ -315,22 +320,21 @@ public class FileArchiverMain {
 				elapsed = System.currentTimeMillis() - start;
 				System.out.println("Done in " + elapsed + "ms");
 
-				// 5. Delete all files that already archived
-				
-				//for testing
-				Thread.sleep(500);				
-				//
-				
+				/** 5. Delete all files that already archived */
+
+				/** for testing */
+				Thread.sleep(500);
+
 				System.out.print("\t5.Delete files in source folder '" + sourceFolder.getAbsolutePath() + "' ... ");
 				start = System.currentTimeMillis();
-				count = copyFilesToTempOrDelete(sourceFolder, sourceFolder, tempSubFolder, cleanSource, noSubFolderScan, DELETE);
-				System.out.println("Delete " + count + " files");
+				deletedCount = copyFilesToTempOrDelete(sourceFolder, sourceFolder, tempSubFolder, cleanSource, noSubFolderScan, DELETE);
+				System.out.println("Delete " + deletedCount + " files");
 				elapsed = System.currentTimeMillis() - start;
 				System.out.println("Done in " + elapsed + "ms");
 			}
 		} catch (Exception e) {
 
-			// clear temp folder if archivation is aborted
+			/** clear temp folder if archivation is aborted */
 			if (tempSubFolder.exists()) {
 				try {
 					deleteFolder(tempSubFolder);
@@ -341,7 +345,7 @@ public class FileArchiverMain {
 			System.out.println("Cannot complete process: sourceFolder=" + sourceFolder + "; destFolder=" + destFolder + "; tempFolder=" + tempFolder);
 			e.printStackTrace();
 		}
-		return count;
+		return copiedCount;
 	}
 
 	private static void checkAvailableDiskSpace(File sourceFolder, File tempFolder, boolean noSubFolderScan, File destFolder) {
@@ -353,7 +357,7 @@ public class FileArchiverMain {
 			String message = "Available disk space with temp folder is not enough to move." + " The size of files that need moving is " + sizeFiles
 					+ " Bytes. Available disk space" + " with temp folder is " + tempFolder.getFreeSpace() + " Bytes";
 
-			sendEmail(message);
+			Helper.sendEmail(message);			
 
 			throw new RuntimeException("do not have enough temp folder disc memory");
 		}
@@ -362,7 +366,7 @@ public class FileArchiverMain {
 			String message = "Available disk space with dest folder is not enough to achivation." + " The size of files that need archivation is " + sizeFiles
 					+ " Bytes. Available disk space" + " with dest folder is " + destFolder.getFreeSpace() + " Bytes";
 
-			sendEmail(message);
+			Helper.sendEmail(message);	
 			throw new RuntimeException("Do not have enough dest folder disc memory");
 		}
 	}
@@ -402,7 +406,7 @@ public class FileArchiverMain {
 		final String relSubFolderPath = sourceSubFolder.getAbsolutePath().substring(sourceFolder.getAbsolutePath().length());
 
 		for (int i = 0; i < fileArray.length; i++) {
-			File currentFile = fileArray[i];			
+			File currentFile = fileArray[i];
 			try {
 				if (command.equals(COPY)) {
 					final File newSubFolder = new File(tempFolder, relSubFolderPath);
@@ -435,12 +439,11 @@ public class FileArchiverMain {
 
 						if (listFiles == null || listFiles.length == 0) {
 							if (currentFolder != null && (!currentFolder.delete() || currentFolder.exists())) {
-								/*
-								 * IMPORTANT!
-								 * 
-								 * We tried to delete a folder, but didn't
-								 * manage. The main reason - it contains sub
-								 * folders, which were not deleted at
+
+								/**
+								 * IMPORTANT! We tried to delete a folder, but
+								 * didn't manage. The main reason - it contains
+								 * sub folders, which were not deleted at
 								 * moveFilesToTemp
 								 */
 								System.out.println("Could not delete source folder '" + currentFolder.getAbsolutePath() + "'");
@@ -469,28 +472,32 @@ public class FileArchiverMain {
 	}
 
 	public static void copyFileBuffered(File currentFile, File destSubFolder) {
-		// TODO Auto-generated method stub
+
 		if (currentFile == null | destSubFolder == null) {
-			throw new NullPointerException();
+			throw new NullPointerException("current file or dest file is null");
 		}
 
 		final File fileDest = new File(destSubFolder, currentFile.getName());
 
 		destSubFolder.mkdirs();
 		if (!(destSubFolder.exists() & destSubFolder.isDirectory())) {
-			throw new RuntimeException("Cannot create folder " + destSubFolder.getAbsolutePath() + " or it is not a directory");
+			throw new RuntimeException("Cannot create folder " + destSubFolder.getPath() + " or it is not a directory");
 		}
 
 		if (fileDest.isDirectory()) {
-			throw new IllegalArgumentException("Destination file " + fileDest + " is directory");
+			throw new IllegalArgumentException("Destination file " + fileDest.getPath() + " is directory");
 		}
 
 		if (!currentFile.exists()) {
-			throw new IllegalArgumentException("Source file " + currentFile + " does not exist");
+			throw new IllegalArgumentException("Current file " + currentFile.getPath() + " does not exist");
 		}
 
 		if (currentFile.isDirectory()) {
-			throw new IllegalArgumentException("Source file " + fileDest + " is directory");
+			throw new IllegalArgumentException("Current file " + currentFile.getPath() + " is directory");
+		}
+		
+		if (!currentFile.canRead()) {
+			throw new IllegalArgumentException("Can not read current file " + currentFile.getPath());
 		}
 
 		if (!fileDest.exists()) {
@@ -503,11 +510,7 @@ public class FileArchiverMain {
 		}
 
 		if (!fileDest.canWrite()) {
-			throw new IllegalArgumentException("Can not write to destinstion file " + fileDest);
-		}
-
-		if (!currentFile.canRead()) {
-			throw new IllegalArgumentException("Can not read source file " + currentFile);
+			throw new IllegalArgumentException("Can not write to destinstion file " + fileDest.getPath());
 		}
 
 		BufferedInputStream in = null;
@@ -580,10 +583,10 @@ public class FileArchiverMain {
 	}
 
 	private static File compactFolderWithGZIP(File folder, String archiveName) throws IOException {
-		// Create STORED zip file
+		/** Create STORED zip file */
 		final File archiveFile = compactFolder(folder, archiveName, true);
 
-		// Create GZip
+		/** Create GZip */
 		File archiveFileGZip = new File(archiveFile.getParent(), archiveName + ZIP + GZIP);
 		GZIPOutputStream gzip = new GZIPOutputStream(new FileOutputStream(archiveFileGZip)) {
 			{
@@ -593,7 +596,7 @@ public class FileArchiverMain {
 		gzipDir(archiveFile, gzip);
 		gzip.close();
 
-		// Delete STORED Zip file
+		/** Delete STORED Zip file */
 		if (!archiveFile.delete()) {
 			System.out.print("Could not delete STORED zip archive.");
 		}
@@ -604,12 +607,12 @@ public class FileArchiverMain {
 	 * Zip up a directory path
 	 */
 	public static void zipDir(File zipDir, ZipOutputStream zos, String path, boolean stored) throws IOException {
-		// get a listing of the directory content
+		/** get a listing of the directory content */
 		String[] dirList = zipDir.list();
 		byte[] readBuffer = new byte[2156];
 		int bytesIn = 0;
 		final CRC32 crc = stored ? new CRC32() : null;
-		// loop through dirList, and zip the files
+		/** loop through dirList, and zip the files */
 		for (int i = 0; i < dirList.length; i++) {
 			File f = new File(zipDir, dirList[i]);
 			if (f.isDirectory()) {
@@ -714,36 +717,12 @@ public class FileArchiverMain {
 			return file.isFile();
 		}
 	}
-
-	private static void sendEmail(String message) {
-
-		// Mail notification module
-		String host, username, password, sendTo;
-		int port;
-
-		String[] mailConfig = Helper.readMailConfigs();
-
-		if (mailConfig != null) {
-
-			host = mailConfig[0];
-			port = Integer.parseInt(mailConfig[1]);
-			username = mailConfig[2];
-			password = mailConfig[3];
-			sendTo = mailConfig[4];
-
-			EMailNotifier mailNotifier = new EMailNotifier(host, port, username, password);
-			try {
-				mailNotifier.sendMail(sendTo, "Logs archiver", message);
-			} catch (Exception e) {
-				System.out.println("Cannot send Email with next configuration:");
-				String[] mailNames = { "host", "port", "username", "password", "sendTo" };
-				for (int i = 0; i < mailConfig.length; i++) {
-					System.out.println(mailNames[i] + ": " + mailConfig[i]);
-				}
-				System.out.println(e);
-			}
-		}
-		//
+	
+	public static long getCopiedCount() {
+		return copiedCount;
 	}
 
+	public static long getDeletedCount() {
+		return deletedCount;
+	}
 }

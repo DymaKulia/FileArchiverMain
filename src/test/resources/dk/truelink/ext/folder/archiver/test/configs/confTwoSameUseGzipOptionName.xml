@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>	
+	<task id="someId1" sourceFolder="somePath">
+		<option name="useGzip">true</option>
+		<option name="useGzip">true</option>
+	</task>
+</configuration>
