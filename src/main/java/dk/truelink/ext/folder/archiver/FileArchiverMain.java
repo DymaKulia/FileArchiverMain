@@ -43,13 +43,13 @@ public class FileArchiverMain {
 	public static void main(String[] args) {
 
 		if (args.length == 0) {
-			String message = "Unknown path to configuration file";
+			System.out.println("Unknown path to configuration file");
 			System.out.println("Use pattern: java -jar Archiver-0.0.1-all.jar <path to " + "configuration file> for execution mode");
 			System.out.println("Or use pattern: java -jar Archiver-0.0.1-all.jar <path to " + "configuration file> <check> for configuration checking mode");
-			throw new RuntimeException(message);
+			System.exit(0);			
 		} else if (args.length > 2) {
-			String message = "Too much input parameters for archiver";
-			throw new RuntimeException(message);
+			System.out.println("Too much input parameters for archiver");
+			System.exit(0);
 		} else if (args.length == 2) {
 
 			/** Do check of archiver configuration and print it */
@@ -123,7 +123,8 @@ public class FileArchiverMain {
 
 		File archiverConfig = new File(path);
 		if (!archiverConfig.exists()) {
-			throw new RuntimeException("Configuration file for archiver does not exist");
+			System.out.println("Configuration file for archiver does not exist");
+			System.exit(0);	
 		}
 
 		ArrayList<Task> configuration = null;
@@ -131,7 +132,8 @@ public class FileArchiverMain {
 			configuration = Helper.readArchivationConfigs(archiverConfig);
 		} catch (RuntimeException ex) {
 			System.out.println("Archive prosess is aborted");
-			throw ex;
+			ex.printStackTrace();
+			System.exit(0);	
 		}
 		return configuration;
 	}
