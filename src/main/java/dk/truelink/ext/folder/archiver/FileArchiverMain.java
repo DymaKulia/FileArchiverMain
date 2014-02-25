@@ -20,7 +20,12 @@ import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class FileArchiverMain {
+
+	private static final Logger mainLogger = LoggerFactory.getLogger("FileArchiverMain");
 
 	private static final String LOCK_FILENAME = "fileArchiver.lock";
 	private static final String ZIP = ".zip";
@@ -46,18 +51,21 @@ public class FileArchiverMain {
 			System.out.println("Unknown path to configuration file");
 			System.out.println("Use pattern: java -jar Archiver-0.0.1-all.jar <path to " + "configuration file> for execution mode");
 			System.out.println("Or use pattern: java -jar Archiver-0.0.1-all.jar <path to " + "configuration file> <check> for configuration checking mode");
-			System.exit(0);			
+			mainLogger.error("Unknown path to configuration file");
+			return;
 		} else if (args.length > 2) {
 			System.out.println("Too much input parameters for archiver");
-			System.exit(0);
+			mainLogger.error("Too much input parameters for archiver");
+			return;
 		} else if (args.length == 2) {
 
 			/** Do check of archiver configuration and print it */
 			checkArchiverConfiguration(args);
 
 		} else if (args.length == 1) {
-
-			ArrayList<Task> configuration = readConfigurationFromFile(args[0]);
+			
+			mainLogger.debug("------- PROGRAM STARTED IN TIME: " + Calendar.getInstance().getTime()+" ---------");
+			ArrayList<Task> configuration = readConfigurationFromFile(args[0]);			
 			doAllTasks(configuration);
 		}
 	}
@@ -113,7 +121,6 @@ public class FileArchiverMain {
 						System.out.print(inArgs[k] + " ");
 					}
 					System.out.println("is aborted");
-					ex.printStackTrace();
 				}
 			}
 		}
@@ -124,16 +131,18 @@ public class FileArchiverMain {
 		File archiverConfig = new File(path);
 		if (!archiverConfig.exists()) {
 			System.out.println("Configuration file for archiver does not exist");
-			System.exit(0);	
+			mainLogger.error("Configuration file for archiver does not exist   ");
+			return null;
 		}
 
 		ArrayList<Task> configuration = null;
 		try {
 			configuration = Helper.readArchivationConfigs(archiverConfig);
 		} catch (RuntimeException ex) {
-			System.out.println("Archive prosess is aborted");
+			System.out.println("All archive prosess is aborted");
 			ex.printStackTrace();
-			System.exit(0);	
+			mainLogger.error("All archive prosess is aborted \n", ex);
+			throw new RuntimeException(ex.getMessage());
 		}
 		return configuration;
 	}
@@ -156,7 +165,7 @@ public class FileArchiverMain {
 				}
 			}
 
-		} else {
+		} else {			
 			throw new RuntimeException("Unknown parameter " + args[1]);
 		}
 
@@ -199,21 +208,39 @@ public class FileArchiverMain {
 						throw new RuntimeException("Program has been already started. Found lock file in destination folder '" + lockFile.getAbsolutePath() + "'");
 					}
 					System.out.println("-----------------------------------------------------------");
-					System.out.println("Program started with args:");
-					System.out.println("\tSource folder '" + source + "' (which folder to read)");
-					System.out.println("\tDest   folder '" + dest + "' (where to put archived files)");
-					System.out.println("\tTemp   folder '" + temp + "' (folder to use for temporary copied files)");
-					System.out.println("\tForce  GZIP   '" + forceGZip + "' (at first ZIP into one file without deflation, than GZIP this file)");
-					System.out.println("\tClean  source '" + cleanSource + "' (delete empty subfolders of source folder if all their files are moved into archive)");
-					System.out.println("\tNo sub folder scan '" + noSubFolderScan + "' (work only with given folder, do not scan sub folders)");
-					System.out.println("\tAge modify '" + ageModify + "'");
+					mainLogger.debug("-----------------------------------------------------------------------");
 
+					System.out.println("\tProgram started with args:");
+					mainLogger.debug("\tProgram started with args:             ");
+
+					System.out.println("\tSource folder '" + source + "' (which folder to read)");
+					mainLogger.debug("\tSource folder '" + source + "' (which folder to read)              ");
+
+					System.out.println("\tDest   folder '" + dest + "' (where to put archived files)");
+					mainLogger.debug("\tDest   folder '" + dest + "' (where to put archived files)             ");
+
+					System.out.println("\tTemp   folder '" + temp + "' (folder to use for temporary copied files)");
+					mainLogger.debug("\tTemp   folder '" + temp + "' (folder to use for temporary copied files)             ");
+
+					System.out.println("\tForce  GZIP   '" + forceGZip + "' (at first ZIP into one file without deflation, than GZIP this file)");
+					mainLogger.debug("\tForce  GZIP   '" + forceGZip + "' (at first ZIP into one file without deflation, than GZIP this file)             ");
+
+					System.out.println("\tClean  source '" + cleanSource + "' (delete empty subfolders of source folder if all their files are moved into archive)");
+					mainLogger.debug("\tClean  source '" + cleanSource + "' (delete empty subfolders of source folder if all their files are moved into archive)             ");
+					
+					System.out.println("\tNo sub folder scan '" + noSubFolderScan + "' (work only with given folder, do not scan sub folders)");
+					mainLogger.debug("\tNo sub folder scan '" + noSubFolderScan + "' (work only with given folder, do not scan sub folders)             ");
+					
+					System.out.println("\tAge modify '" + ageModify + "'");
+					mainLogger.debug("\tAge modify '" + ageModify + "'             ");
+										
 					long start = System.currentTimeMillis();
 					long count = process(sourceFolder, destFolder, tempFolder, forceGZip, cleanSource, noSubFolderScan);
 					long elapsed = System.currentTimeMillis() - start;
 
 					System.out.println("Done in " + (elapsed / 1000) + " seconds, generated archive has " + count + " files");
-
+					mainLogger.debug("\tDone in " + (elapsed / 1000) + " seconds, generated archive has " + count + " files             ");
+					
 				} finally {
 					lockFileLock.release();
 				}
@@ -359,7 +386,7 @@ public class FileArchiverMain {
 			String message = "Available disk space with temp folder is not enough to move." + " The size of files that need moving is " + sizeFiles
 					+ " Bytes. Available disk space" + " with temp folder is " + tempFolder.getFreeSpace() + " Bytes";
 
-			Helper.sendEmail(message);			
+			Helper.sendEmail(message);
 
 			throw new RuntimeException("do not have enough temp folder disc memory");
 		}
@@ -368,7 +395,7 @@ public class FileArchiverMain {
 			String message = "Available disk space with dest folder is not enough to achivation." + " The size of files that need archivation is " + sizeFiles
 					+ " Bytes. Available disk space" + " with dest folder is " + destFolder.getFreeSpace() + " Bytes";
 
-			Helper.sendEmail(message);	
+			Helper.sendEmail(message);
 			throw new RuntimeException("Do not have enough dest folder disc memory");
 		}
 	}
@@ -497,7 +524,7 @@ public class FileArchiverMain {
 		if (currentFile.isDirectory()) {
 			throw new IllegalArgumentException("Current file " + currentFile.getPath() + " is directory");
 		}
-		
+
 		if (!currentFile.canRead()) {
 			throw new IllegalArgumentException("Can not read current file " + currentFile.getPath());
 		}
@@ -719,7 +746,7 @@ public class FileArchiverMain {
 			return file.isFile();
 		}
 	}
-	
+
 	public static long getCopiedCount() {
 		return copiedCount;
 	}

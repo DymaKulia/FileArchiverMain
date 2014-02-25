@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+    <!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+	<appender name="ALL-LOGS-APPENDER" class="org.apache.log4j.FileAppender">
+		<param name="file" value="allLogs.txt" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d{ISO8601} [%5p] %c %m at %l%n" />
+		</layout>
+	</appender>	
+
+	<logger name="FileArchiverMain" additivity="false">
+		<level value="debug" />
+		<appender-ref ref="ALL-LOGS-APPENDER" />
+	</logger>
+
+</log4j:configuration>

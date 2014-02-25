@@ -4,14 +4,14 @@ import java.io.File;
 import java.util.ArrayList;
 
 public class Checker {
-	
+
 	private static int countWarnings;
 
 	public static void checkAllArchiverConfiguration(String pathToConfigurationFile) {
 
-		System.out.println("");
-		System.out.println("---------- START CHECKING -------------");
-		System.out.println("");
+		System.out.println("");		
+		System.out.println("---------- START CHECKING -------------");		
+		System.out.println("");		
 
 		File archiverConfigXml = new File(pathToConfigurationFile);
 		if (!archiverConfigXml.exists()) {
@@ -78,11 +78,11 @@ public class Checker {
 	}
 
 	public static int checkTaskConfiguration(File sourceFolder, File destFolder, File tempFolder, boolean checkerMode) {
-		
-		if (!(sourceFolder.exists() & sourceFolder.isDirectory())) {
-			System.out.println("");
-			System.out.println("WARNING: source folder " + sourceFolder.getPath() + " does not exist or is not a directory");
 
+		if (!(sourceFolder.exists() & sourceFolder.isDirectory())) {
+			System.out.println("");						
+			System.out.println("WARNING: source folder " + sourceFolder.getPath() + " does not exist or is not a directory");
+			
 			countWarnings++;
 			if (!checkerMode) {
 				throw new RuntimeException("Error");
