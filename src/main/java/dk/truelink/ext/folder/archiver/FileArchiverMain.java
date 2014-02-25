@@ -63,9 +63,9 @@ public class FileArchiverMain {
 			checkArchiverConfiguration(args);
 
 		} else if (args.length == 1) {
-			
-			mainLogger.debug("------- PROGRAM STARTED IN TIME: " + Calendar.getInstance().getTime()+" ---------");
-			ArrayList<Task> configuration = readConfigurationFromFile(args[0]);			
+
+			mainLogger.debug("------------ PROGRAM STARTED IN TIME: " + Calendar.getInstance().getTime() + " ---------------");
+			ArrayList<Task> configuration = readConfigurationFromFile(args[0]);
 			doAllTasks(configuration);
 		}
 	}
@@ -114,6 +114,7 @@ public class FileArchiverMain {
 				ageModify = Integer.parseInt(task.getAgeModify()) * -1;
 				try {
 					fileFilter = new AgeFileFilter();
+					mainLogger.debug("---------------------------Start Task \"" + task.getId() + "\"---------------------------------------");
 					doArchiveTask(inArgs);
 				} catch (Exception ex) {
 					System.out.println("Archive prosess with input parameters ");
@@ -121,6 +122,7 @@ public class FileArchiverMain {
 						System.out.print(inArgs[k] + " ");
 					}
 					System.out.println("is aborted");
+					mainLogger.error("Archive prosess with input parameters: source=" + inArgs[0] + " dest=" + inArgs[1] + " temp=" + inArgs[2] + "\n is aborted", ex);
 				}
 			}
 		}
@@ -165,7 +167,7 @@ public class FileArchiverMain {
 				}
 			}
 
-		} else {			
+		} else {
 			throw new RuntimeException("Unknown parameter " + args[1]);
 		}
 
@@ -208,53 +210,56 @@ public class FileArchiverMain {
 						throw new RuntimeException("Program has been already started. Found lock file in destination folder '" + lockFile.getAbsolutePath() + "'");
 					}
 					System.out.println("-----------------------------------------------------------");
-					mainLogger.debug("-----------------------------------------------------------------------");
-
+					
 					System.out.println("\tProgram started with args:");
-					mainLogger.debug("\tProgram started with args:             ");
+					mainLogger.debug("\tProgram started with args:");
 
 					System.out.println("\tSource folder '" + source + "' (which folder to read)");
-					mainLogger.debug("\tSource folder '" + source + "' (which folder to read)              ");
+					mainLogger.debug("\tSource folder '" + source + "' (which folder to read)");
 
 					System.out.println("\tDest   folder '" + dest + "' (where to put archived files)");
-					mainLogger.debug("\tDest   folder '" + dest + "' (where to put archived files)             ");
+					mainLogger.debug("\tDest   folder '" + dest + "' (where to put archived files)");
 
 					System.out.println("\tTemp   folder '" + temp + "' (folder to use for temporary copied files)");
-					mainLogger.debug("\tTemp   folder '" + temp + "' (folder to use for temporary copied files)             ");
+					mainLogger.debug("\tTemp   folder '" + temp + "' (folder to use for temporary copied files)");
 
 					System.out.println("\tForce  GZIP   '" + forceGZip + "' (at first ZIP into one file without deflation, than GZIP this file)");
-					mainLogger.debug("\tForce  GZIP   '" + forceGZip + "' (at first ZIP into one file without deflation, than GZIP this file)             ");
+					mainLogger.debug("\tForce  GZIP   '" + forceGZip + "' (at first ZIP into one file without deflation, than GZIP this file)");
 
 					System.out.println("\tClean  source '" + cleanSource + "' (delete empty subfolders of source folder if all their files are moved into archive)");
-					mainLogger.debug("\tClean  source '" + cleanSource + "' (delete empty subfolders of source folder if all their files are moved into archive)             ");
-					
+					mainLogger.debug("\tClean  source '" + cleanSource + "' (delete empty subfolders of source folder if all their files are moved into archive)");
+
 					System.out.println("\tNo sub folder scan '" + noSubFolderScan + "' (work only with given folder, do not scan sub folders)");
-					mainLogger.debug("\tNo sub folder scan '" + noSubFolderScan + "' (work only with given folder, do not scan sub folders)             ");
-					
+					mainLogger.debug("\tNo sub folder scan '" + noSubFolderScan + "' (work only with given folder, do not scan sub folders)");
+
 					System.out.println("\tAge modify '" + ageModify + "'");
-					mainLogger.debug("\tAge modify '" + ageModify + "'             ");
-										
+					mainLogger.debug("\tAge modify '" + ageModify + "'");
+
 					long start = System.currentTimeMillis();
 					long count = process(sourceFolder, destFolder, tempFolder, forceGZip, cleanSource, noSubFolderScan);
 					long elapsed = System.currentTimeMillis() - start;
 
 					System.out.println("Done in " + (elapsed / 1000) + " seconds, generated archive has " + count + " files");
-					mainLogger.debug("\tDone in " + (elapsed / 1000) + " seconds, generated archive has " + count + " files             ");
-					
+					mainLogger.debug("\tDone in " + (elapsed / 1000) + " seconds, generated archive has " + count + " files");
+					mainLogger.debug("----------------------------------------------------------------------------------");
+										
 				} finally {
 					lockFileLock.release();
 				}
 			} catch (IOException e) {
 				System.out.println("Try lock operation is fail on '" + lockFile.getAbsolutePath() + "'");
+				mainLogger.error("Try lock operation is fail on '" + lockFile.getAbsolutePath() + "'", e);
 				e.printStackTrace();
 			} finally {
 				out.close();
 			}
 		} catch (FileNotFoundException e) {
 			System.out.println("Could not find the file '" + lockFile.getAbsolutePath() + "' to create the FileInputStream");
+			mainLogger.error("Could not find the file '" + lockFile.getAbsolutePath() + "' to create the FileInputStream", e);
 			e.printStackTrace();
 		} catch (IOException e) {
 			System.out.println("Could not create/close the FileInputStream for '" + lockFile.getAbsolutePath() + "' file");
+			mainLogger.error("Could not create/close the FileInputStream for '" + lockFile.getAbsolutePath() + "' file", e);
 			e.printStackTrace();
 		} finally {
 			lockFile.delete();
@@ -302,23 +307,26 @@ public class FileArchiverMain {
 			final String tempSubFolderName = new SimpleDateFormat("yyyy.MM.dd_HH.mm.ss.SSS").format(searchStartTime.getTime());
 			tempSubFolder = new File(tempFolder, tempSubFolderName);
 
-			System.out.println("Check available disk space");
-
+			System.out.println("Check available disk space         ");
+			mainLogger.debug("\tCheck available disk space");
 			checkAvailableDiskSpace(sourceFolder, tempFolder, noSubFolderScan, destFolder);
 
 			System.out.print("\t1.Copy files to temp sub folder '" + tempSubFolderName + "' ... ");
-
+			mainLogger.debug("\t1.Copy files to temp sub folder '" + tempSubFolderName + "' ...");
 			start = System.currentTimeMillis();
 			copiedCount = copyFilesToTempOrDelete(sourceFolder, sourceFolder, tempSubFolder, cleanSource, noSubFolderScan, COPY);
 			elapsed = System.currentTimeMillis() - start;
 			System.out.println("Done in " + elapsed + "ms, moved " + copiedCount + " files.");
-
+			mainLogger.debug("\tDone in " + elapsed + "ms, moved " + copiedCount + " files.");
+			
 			if (copiedCount > 0) {
 
 				/** 2. Make an archive */
 				final String archiveName = new SimpleDateFormat("yyyy.MM.dd_HH.mm.ss.SSS").format(searchStartTime.getTime());
 
 				System.out.print("\t2.Making an archive '" + archiveName + "' ... ");
+				mainLogger.debug("\t2.Making an archive '" + archiveName + "' ...");
+				
 				File archiveFile = null;
 				start = System.currentTimeMillis();
 				if (forceGZIP) {
@@ -328,13 +336,16 @@ public class FileArchiverMain {
 				}
 				elapsed = System.currentTimeMillis() - start;
 				System.out.println("Done in " + elapsed + "ms, size=" + archiveFile.length() + "B, path = '" + archiveFile.getAbsolutePath() + "'");
-
+				mainLogger.debug("\tDone in " + elapsed + "ms, size=" + archiveFile.length() + "B, path = '" + archiveFile.getAbsolutePath() + "'");
+						
 				/** 3. Delete temporary sub folder */
 				System.out.print("\t3.Deleting temporary sub folder '" + tempSubFolder.getAbsolutePath() + "' ... ");
+				mainLogger.debug("\t3.Deleting temporary sub folder '" + tempSubFolder.getAbsolutePath() + "' ...");
 				start = System.currentTimeMillis();
 				long deletedFileCount = deleteFolder(tempSubFolder);
 				elapsed = System.currentTimeMillis() - start;
 				System.out.println("Done in " + elapsed + "ms, deleted " + deletedFileCount + " files.");
+				mainLogger.debug("\tDone in " + elapsed + "ms, deleted " + deletedFileCount + " files.");
 
 				/**
 				 * 4. Move archive to destination folder using current date as
@@ -344,10 +355,12 @@ public class FileArchiverMain {
 				final File destSubFolder = new File(destFolder, destSubFolderRelPath);
 
 				System.out.print("\t4.Moving archive to destination sub folder '" + destSubFolder.getAbsolutePath() + "' ... ");
+				mainLogger.debug("\t4.Moving archive to destination sub folder '" + destSubFolder.getAbsolutePath() + "' ...");
 				start = System.currentTimeMillis();
 				moveFile(archiveFile, destSubFolder);
 				elapsed = System.currentTimeMillis() - start;
 				System.out.println("Done in " + elapsed + "ms");
+				mainLogger.debug("\tDone in " + elapsed + "ms");
 
 				/** 5. Delete all files that already archived */
 
@@ -355,11 +368,14 @@ public class FileArchiverMain {
 				Thread.sleep(500);
 
 				System.out.print("\t5.Delete files in source folder '" + sourceFolder.getAbsolutePath() + "' ... ");
+				mainLogger.debug("\t5.Delete files in source folder '" + sourceFolder.getAbsolutePath() + "' ...");
 				start = System.currentTimeMillis();
 				deletedCount = copyFilesToTempOrDelete(sourceFolder, sourceFolder, tempSubFolder, cleanSource, noSubFolderScan, DELETE);
 				System.out.println("Delete " + deletedCount + " files");
+				mainLogger.debug("\tDelete " + deletedCount + " files");
 				elapsed = System.currentTimeMillis() - start;
 				System.out.println("Done in " + elapsed + "ms");
+				mainLogger.debug("\tDone in " + elapsed + "ms");
 			}
 		} catch (Exception e) {
 
@@ -369,10 +385,12 @@ public class FileArchiverMain {
 					deleteFolder(tempSubFolder);
 				} catch (Exception e1) {
 					e1.printStackTrace();
+					mainLogger.error("Exception", e1);
 				}
 			}
 			System.out.println("Cannot complete process: sourceFolder=" + sourceFolder + "; destFolder=" + destFolder + "; tempFolder=" + tempFolder);
 			e.printStackTrace();
+			mainLogger.error("Exception", e);			
 		}
 		return copiedCount;
 	}

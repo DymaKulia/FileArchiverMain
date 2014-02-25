@@ -112,42 +112,42 @@ public class TestLogArchiver {
 			Checker.checkTaskConfiguration(new File("someFile"), testDestFolder, testTempFolder, false);
 			fail("must be called RuntimeException");
 		} catch (RuntimeException ex) {
-			assertEquals("Message must be \"Error\"", ex.getMessage(), "Error");
+			assertEquals("Message must be \"source folder\"", ex.getMessage().substring(0, 13), "source folder");
 		}
 
 		try {
 			Checker.checkTaskConfiguration(testSourceFolder, new File("someFile"), testTempFolder, false);
 			fail("must be called RuntimeException");
 		} catch (RuntimeException ex) {
-			assertEquals("Message must be \"Error\"", ex.getMessage(), "Error");
+			assertEquals("Message must be \"destination folder\"", ex.getMessage().substring(0, 18), "destination folder");
 		}
 
 		try {
 			Checker.checkTaskConfiguration(testSourceFolder, testDestFolder, new File("someFile"), false);
 			fail("must be called RuntimeException");
 		} catch (RuntimeException ex) {
-			assertEquals("Message must be \"Error\"", ex.getMessage(), "Error");
+			assertEquals("Message must be \"temporary folder\"", ex.getMessage().substring(0, 16), "temporary folder");
 		}
 
 		try {
 			Checker.checkTaskConfiguration(testDestFolder, testDestFolder, testTempFolder, false);
 			fail("must be called RuntimeException");
 		} catch (RuntimeException ex) {
-			assertEquals("Message must be \"Error\"", ex.getMessage(), "Error");
+			assertEquals("Message must be \"source\"", ex.getMessage().substring(0, 6), "source");
 		}
 
 		try {
 			Checker.checkTaskConfiguration(testTempFolder, testDestFolder, testTempFolder, false);
 			fail("must be called RuntimeException");
 		} catch (RuntimeException ex) {
-			assertEquals("Message must be \"Error\"", ex.getMessage(), "Error");
+			assertEquals("Message must be \"source\"", ex.getMessage().substring(0, 6), "source");
 		}
 
 		try {
 			Checker.checkTaskConfiguration(testSourceFolder, testDestFolder, testDestFolder, false);
 			fail("must be called RuntimeException");
 		} catch (RuntimeException ex) {
-			assertEquals("Message must be \"Error\"", ex.getMessage(), "Error");
+			assertEquals("Message must be \"temporary\"", ex.getMessage().substring(0, 9), "temporary");
 		}
 
 	}

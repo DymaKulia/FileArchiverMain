@@ -85,7 +85,7 @@ public class Checker {
 			
 			countWarnings++;
 			if (!checkerMode) {
-				throw new RuntimeException("Error");
+				throw new RuntimeException("source folder " + sourceFolder.getPath() + " does not exist or is not a directory");
 			}
 		}
 		if (!(destFolder.exists() & destFolder.isDirectory())) {
@@ -94,7 +94,7 @@ public class Checker {
 
 			countWarnings++;
 			if (!checkerMode) {
-				throw new RuntimeException("Error");
+				throw new RuntimeException("destination folder " + destFolder.getPath() + " does not exist or is not a directory");
 			}
 		}
 		if (!(tempFolder.exists() & tempFolder.isDirectory())) {
@@ -103,7 +103,7 @@ public class Checker {
 
 			countWarnings++;
 			if (!checkerMode) {
-				throw new RuntimeException("Error");
+				throw new RuntimeException("temporary folder " + tempFolder.getPath() + " does not exist or is not a directory");
 			}
 		}
 
@@ -114,7 +114,7 @@ public class Checker {
 
 			countWarnings++;
 			if (!checkerMode) {
-				throw new RuntimeException("Error");
+				throw new RuntimeException("source " + sourceFolder.getPath() + " and destination " + destFolder.getPath() + "  folders must not be the same");
 			}
 		}
 
@@ -124,7 +124,7 @@ public class Checker {
 
 			countWarnings++;
 			if (!checkerMode) {
-				throw new RuntimeException("Error");
+				throw new RuntimeException("temporary " + tempFolder.getPath() + " and destination " + destFolder.getPath() + "  folders must not be the same");
 			}
 		}
 
@@ -134,7 +134,7 @@ public class Checker {
 
 			countWarnings++;
 			if (!checkerMode) {
-				throw new RuntimeException("Error");
+				throw new RuntimeException("source " + sourceFolder.getPath() + " and temporary " + tempFolder.getPath() + "  folders must not be the same");
 			}
 		}
 		return countWarnings;
